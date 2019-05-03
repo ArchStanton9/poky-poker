@@ -46,8 +46,8 @@ namespace OfflinePoker.Domain.Tests
         public void Test2()
         {
             game.MakeAct(Play.Call, 40)
-                .MakeAct(Play.Check)
                 .MakeAct(Play.Fold)
+                .MakeAct(Play.Check)
                 .NextRound()
                 .MakeAct(Play.Check)
                 .MakeAct(Play.Check);
