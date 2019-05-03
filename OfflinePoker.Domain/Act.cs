@@ -1,13 +1,16 @@
 ﻿namespace OfflinePoker.Domain
 {
-    public enum Act
+    public struct Act
     {
-        None,
-        Fold,
-        Check,
-        Call,
-        Bet,
-        Raise,
-        AllIn
+        public Act(int player, Play play, int bet)
+        {
+            Player = player;
+            Play = play;
+            Bet = bet;
+        }
+
+        public int Player { get; }
+        public Play Play { get; }
+        public int Bet { get; }
     }
 }

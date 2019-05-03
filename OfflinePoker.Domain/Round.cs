@@ -4,213 +4,161 @@ using OfflinePoker.Domain.Exceptions;
 
 namespace OfflinePoker.Domain
 {
-    public class RoundActor
-    {
-        public int Bet;
-        public Act LastAct;
-        public Player Player;
-
-        public RoundActor MakeAct(Act act, int bet) =>
-            new RoundActor
-            {
-                Bet = Bet + bet,
-                LastAct = act,
-                Player = Player
-            };
-
-        public static RoundActor CreateFrom(Player player) =>
-            new RoundActor {Bet = 0, LastAct = 0, Player = player};
-    }
-
-    public class RoundState
-    {
-        public int InTurn;
-        public int Bet;
-        public int Pot;
-    }
-
     public class Round
     {
-        private readonly RoundActor[] actors;
-        private readonly BettingRules rules;
-        private RoundState state;
+        private readonly Act[] acts;
+        private readonly int playersCount;
 
-        private Round(BettingRules rules, IEnumerable<RoundActor> actors, RoundState state)
+        private Round(Act[] acts, int playersCount)
         {
-            this.rules = rules;
-            this.state = state;
-            this.actors = actors.ToArray();
+            this.acts = acts;
+            this.playersCount = playersCount;
+            InTurn = acts.Length == 0 ? 0 : NextActor(acts.Last().Player);
         }
 
-        public static Round CreateInitial(Player[] players, BettingRules rules)
+        public int InTurn { get; }
+        public IReadOnlyCollection<Act> Acts => acts;
+        public int Pot => Acts.Count == 0 ? 0 : Acts.Aggregate(0, (s, a) => s + a.Bet);
+        public int MaxBet => Acts.Count == 0 ? 0 : Acts.Max(a => a.Bet);
+
+        public Play LastPlay(int player) => acts
+            .Where(a => a.Player == player)
+            .Select(a => a.Play)
+            .LastOrDefault();
+
+        public int PlayerBet(int player) => acts
+            .Where(a => a.Player == player)
+            .Aggregate(0, (s, a) => s + a.Bet);
+
+        public bool IsActive(int player) => LastPlay(player) != Play.Fold;
+
+        public IEnumerable<int> ActivePlayers => Enumerable
+            .Range(0, playersCount)
+            .Where(IsActive);
+
+        public bool HasWinner => ActivePlayers.Count() == 1;
+
+        public static Round CreateInitial(BettingRules rules, int playersCount)
         {
-            var actors = new List<RoundActor>();
-            var smallTaken = false;
-
-            var i = players.Length - 1;
-            for (; i >= 0; i--)
-            {
-                var player = players[i];
-                if (!smallTaken)
-                {
-                    if (player.Stack < rules.SmallBlind)
-                        continue;
-
-                    actors.Add(RoundActor
-                        .CreateFrom(player)
-                        .MakeAct(Act.Bet, rules.SmallBlind)
-                    );
-
-                    smallTaken = true;
-                    continue;
-                }
-
-                if (player.Stack < rules.BigBlind)
-                    continue;
-
-                actors.Add(RoundActor
-                    .CreateFrom(player)
-                    .MakeAct(Act.Bet, rules.BigBlind)
-                );
-            }
-
-            actors.Reverse();
-            if (actors.Count < 2)
+            if (playersCount < 2)
                 throw new GameLogicException("Can't start round. Not enough players.");
 
-            actors.AddRange(players.Take(i).Select(RoundActor.CreateFrom));
-
-
-            var state = new RoundState
+            var acts = new[]
             {
-                Bet = rules.BigBlind,
-                Pot = rules.BigBlind + rules.SmallBlind,
-                InTurn = actors.Count == 2 ? 1 : 0
+                new Act(0, Play.Blind, rules.SmallBlind),
+                new Act(1, Play.Blind, rules.BigBlind)
             };
 
-            return new Round(rules, actors, state);
+            return new Round(acts, playersCount);
         }
 
-        private RoundActor CurrentActor => actors[state.InTurn];
-        public Player CurrentPlayer => CurrentActor.Player;
+        public static Round StartNew(int playersCount) =>
+            new Round(new Act[0], playersCount);
 
-        public bool IsComplete => GetNextActorIndex(actors, state) < 0;
+        public bool IsComplete => InTurn < 0;
 
-        public bool HasWinner => actors.Count(a => a.LastAct != Act.Fold) == 1;
+        public Round MakeAct(Play play, int bet = 0) => MakeAct(InTurn, play, bet);
 
-        public Round StartNext()
+        private Round MakeAct(int player, Play play, int bet)
         {
-            if (HasWinner)
-                throw new GameLogicException("Can't start next round. Winner already exists");
+            if (player != InTurn)
+                throw new GameOrderException($"Can not make the act. Current actor is {InTurn}");
 
-            var activeActors = actors.Where(a => a.LastAct != Act.Fold);
-            return new Round(rules, activeActors, new RoundState());
-        }
-
-        public void MakeAct(Act act, int bet = 0)
-        {
-            MakeAct(CurrentActor, act, bet);
-        }
-
-        private void MakeAct(RoundActor actor, Act act, int bet)
-        {
-            if (actor != CurrentActor)
-                throw new GameOrderException($"Can not make the act. Current actor is {CurrentActor}");
-
-            if (!ShouldAct(actor, state))
+            if (!ShouldAct(player))
                 throw new GameLogicException("Current actor is not supposed to act.");
 
-            var options = GetOptions(actor, state);
-            if (!options.Contains(act))
-                throw new GameLogicException($"Actor is not supposed to make '{act}'");
-            
-            state = MakeAct(state, actors, act, bet);
-            actor.LastAct = act;
-            actor.Bet += bet;
-        }
+            var options = GetOptions(player);
+            if (!options.Contains(play))
+                throw new GameLogicException($"Actor is not supposed to make '{play}'");
 
-        private static RoundState MakeAct(RoundState state, RoundActor[] actors, Act act, int bet)
-        {
-            var actor = actors[state.InTurn].MakeAct(act, bet);
-            actors[state.InTurn] = actor;
-            var currentBet = state.Bet;
-            var pot = state.Pot;
-
-            if (act == Act.Bet)
+            if (play == Play.Bet)
             {
-                if (currentBet != 0)
-                    throw new GameLogicException($"Can not make '{Act.Bet}'. Round is already open.");
-
-                currentBet = bet;
-                pot += bet;
+                if (MaxBet != 0)
+                    throw new GameLogicException($"Can not make '{Play.Bet}'. Round is already open.");
             }
 
-            if (act == Act.Raise)
+            if (play == Play.Raise)
             {
-                if (bet < currentBet)
-                    throw new GameLogicException($"Can not make '{Act.Raise}'. Wager is to low.");
-
-                currentBet = bet;
-                pot += bet;
+                if (bet <= MaxBet)
+                    throw new GameLogicException($"Can not make '{Play.Raise}'. Wager is to low.");
             }
 
-            if (act == Act.Call)
+            if (play == Play.Call)
             {
-                if (actor.Bet != state.Bet)
+                var playerBet = PlayerBet(player);
+                if (playerBet + bet != MaxBet)
                     throw new GameLogicException("Call is not matching.");
-                pot += bet;
             }
 
-            return new RoundState
-            {
-                InTurn = GetNextActorIndex(actors, state),
-                Pot = pot,
-                Bet = currentBet
-            };
+            var act = new Act(player, play, bet);
+
+            return new Round(acts.Append(act).ToArray(), playersCount);
         }
 
-        private static int GetNextActorIndex(IReadOnlyList<RoundActor> actors, RoundState state)
+        public int NextActor(int lastActor)
         {
-            var currentActor = state.InTurn;
-            for (var i = currentActor + 1; i < actors.Count; i++)
+            if (lastActor < 0)
+                return 0;
+
+            for (var i = lastActor + 1; i < playersCount; i++)
             {
-                if (ShouldAct(actors[i], state)) return i;
+                if (ShouldAct(i)) return i;
             }
 
-            for (var i = 0; i < currentActor + 1; i++)
+            for (var i = 0; i < lastActor + 1; i++)
             {
-                if (ShouldAct(actors[i], state)) return i;
+                if (ShouldAct(i)) return i;
             }
 
             return -1;
         }
 
-        private static bool ShouldAct(RoundActor actor, RoundState state)
+        public bool ShouldAct(int player)
         {
-            if (actor.LastAct == Act.Fold || actor.LastAct == Act.AllIn)
-                return false;
+            var lastPlay = LastPlay(player);
+            switch (lastPlay)
+            {
+                case Play.Fold:
+                case Play.AllIn:
+                    return false;
 
-            if (actor.LastAct == Act.None)
-                return true;
-
-            return actor.Bet < state.Bet;
+                case Play.None:
+                case Play.Blind:
+                    return true;
+                
+                default:
+                {
+                    var bet = PlayerBet(player);
+                    return bet < MaxBet;
+                }
+            }
         }
 
-        private static Act[] GetOptions(RoundActor actor, RoundState state)
+        public Play[] GetOptions(int player)
         {
-            if (actor.LastAct != Act.Fold)
+            var lastPlay = LastPlay(player);
+            if (lastPlay != Play.Fold)
             {
-                if (state.Bet == 0)
-                    return new[] {Act.Bet, Act.Check};
+                var bet = PlayerBet(player);
 
-                if (actor.Bet == state.Bet)
-                    return new[] {Act.Check, Act.Raise};
+                if (lastPlay == Play.Blind)
+                {
+                    return bet == MaxBet
+                        ? new[] {Play.Check, Play.Raise}
+                        : new[] {Play.Call, Play.Fold};
+                }
 
-                if (actor.Bet < state.Bet)
-                    return new[] {Act.Fold, Act.Call, Act.Raise};
+                if (MaxBet == 0)
+                    return new[] {Play.Bet, Play.Check};
+
+                if (bet == MaxBet)
+                    return new[] {Play.Check, Play.Raise};
+
+                if (bet < MaxBet)
+                    return new[] {Play.Fold, Play.Call, Play.Raise};
             }
 
-            return new Act[0];
+            return new Play[0];
         }
     }
 }

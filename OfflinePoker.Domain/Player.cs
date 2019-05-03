@@ -2,22 +2,27 @@
 {
     public class Player
     {
-        public Player(string name, Hand hand, int position, int stack)
+        public Player(string name, Hand hand, bool active, int stack)
         {
             Name = name;
             Hand = hand;
-            Position = position;
+            IsActive = active;
             Stack = stack;
         }
 
         public string Name { get; }
         public Hand Hand { get; }
-        public int Position { get; }
+        public bool IsActive { get; }
         public int Stack { get; }
 
         public Player WithHand(Hand hand)
         {
-            return new Player(Name, hand, Position, Stack);
+            return new Player(Name, hand, IsActive, Stack);
+        }
+
+        public Player Deactivate()
+        {
+            return new Player(Name, Hand, !IsActive, Stack);
         }
     }
 }
