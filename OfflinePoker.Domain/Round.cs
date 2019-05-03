@@ -160,5 +160,14 @@ namespace OfflinePoker.Domain
 
             return new Play[0];
         }
+
+        public RoundState GetPlayerState(int player) =>
+            new RoundState
+            {
+                Bet = PlayerBet(player),
+                IsActive = IsActive(player),
+                IsCurrent = InTurn == player,
+                LastPlay = LastPlay(player)
+            };
     }
 }

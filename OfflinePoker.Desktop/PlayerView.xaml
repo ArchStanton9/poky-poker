@@ -1,0 +1,28 @@
+﻿<reactiveUi:ReactiveUserControl
+    x:TypeArguments="local:PlayerViewModel"
+    x:Class="OfflinePoker.Desktop.PlayerView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:OfflinePoker.Desktop"
+    xmlns:reactiveUi="http://reactiveui.net"
+    mc:Ignorable="d"
+    d:DesignHeight="450" d:DesignWidth="800">
+
+    <Grid>
+        <Border BorderThickness="2" BorderBrush="CornflowerBlue" CornerRadius="4">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Margin="5 2" x:Name="NameTextBox" Foreground="Black" />
+                <TextBlock Margin="5 2" x:Name="BankTextBox" />
+
+                <CheckBox Margin="10 2 5 2" x:Name="IsActiveCheckbox"/>
+                <CheckBox Margin="5 2" x:Name="InTurnCheckBox"/>
+
+                <TextBlock Margin="5 2" x:Name="LastPlayBlock" />
+                <TextBlock Margin="5 2" x:Name="BetTextBlock" />
+
+            </StackPanel>
+        </Border>
+    </Grid>
+</reactiveUi:ReactiveUserControl>

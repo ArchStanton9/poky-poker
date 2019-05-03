@@ -19,7 +19,7 @@ namespace OfflinePoker.Domain
         public IReadOnlyList<Player> Players { get; }
         public Hand Table { get; }
         public IReadOnlyList<Round> Rounds { get; }
-        public IReadOnlyList<Player> ActivePlayers { get; }
+        public IList<Player> ActivePlayers { get; }
         public Stage Stage => (Stage) Rounds.Count;
         public Round CurrentRound => Rounds.Last();
         public bool IsComplete => Stage == Stage.River && CurrentRound.IsComplete;
@@ -85,7 +85,21 @@ namespace OfflinePoker.Domain
             var copy = Rounds.ToArray();
             copy[copy.Length - 1] = round;
 
-            return new Game(Rules, Players.ToArray(), Table, copy);
+            var game = new Game(Rules, Players.ToArray(), Table, copy);
+            if (game.CurrentRound.IsComplete)
+                return game.NextRound();
+
+            return game;
+        }
+
+        public RoundState GetPlayerState(string name)
+        {
+            var player = Players.First(p => p.Name == name);
+            if (!player.IsActive)
+                return RoundState.Inactive;
+
+            var index = ActivePlayers.IndexOf(player);
+            return CurrentRound.GetPlayerState(index);
         }
     }
 
