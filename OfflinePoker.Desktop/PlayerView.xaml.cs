@@ -1,6 +1,7 @@
 ﻿using System.Reactive.Disposables;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using ReactiveUI;
 
 namespace OfflinePoker.Desktop
@@ -24,13 +25,13 @@ namespace OfflinePoker.Desktop
                     .DisposeWith(cleanup);
 
                 this.OneWayBind(ViewModel,
-                        vm => vm.RoundState.IsActive,
-                        v => v.IsActiveCheckbox.IsChecked)
-                    .DisposeWith(cleanup);
+                    vm => vm.RoundState.IsCurrent,
+                    v => v.PlayerBorder.BorderBrush,
+                    x => x ? Brushes.DodgerBlue: Brushes.DarkGray);
 
                 this.OneWayBind(ViewModel,
-                        vm => vm.RoundState.IsCurrent,
-                        v => v.InTurnCheckBox.IsChecked)
+                        vm => vm.RoundState.IsActive,
+                        v => v.IsActiveCheckbox.IsChecked)
                     .DisposeWith(cleanup);
 
                 this.OneWayBind(ViewModel,
