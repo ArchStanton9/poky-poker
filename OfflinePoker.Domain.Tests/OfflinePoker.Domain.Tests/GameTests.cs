@@ -19,7 +19,7 @@ namespace OfflinePoker.Domain.Tests
         [SetUp]
         public void SetUp()
         {
-            var deck = Deck.CreateStandardDeck();
+            var deck = Deck.BuildStandard();
 
             p1 = new Player("p1", deck.Take(2), true, 5000);
             p2 = new Player("p2", deck.Take(2), true, 4000);

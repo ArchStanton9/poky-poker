@@ -18,7 +18,7 @@ namespace OfflinePoker.Domain
 
         #region StaticHelpers
 
-        public static Deck CreateStandardDeck()
+        public static Deck BuildStandard()
         {
             var cards = new List<Card>(52);
             foreach (Rank rank in Enum.GetValues(typeof(Rank)))

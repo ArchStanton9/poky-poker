@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using OfflinePoker.Domain;
@@ -11,7 +12,7 @@ namespace OfflinePoker.Desktop
     {
         public MainViewModel()
         {
-            var deck = Deck.CreateStandardDeck();
+            var deck = Deck.BuildStandard();
             var players = new[]
             {
                 new Player("p1", deck.Take(2), true, 4000),
@@ -27,13 +28,28 @@ namespace OfflinePoker.Desktop
                 this.WhenAnyValue(v => v.Game),
                 (play, bet) => Game = Game.MakeAct(play, bet));
 
-            NextRoundCommand = ReactiveCommand
-                .Create<Play>(p => Game = Game.NextRound());
-            
+            NextRoundCommand = ReactiveCommand.Create<Unit>(x => OnNextRound());
+
             this.WhenAnyValue(v => v.Game, (Game g) => g.Pot)
                 .ToProperty(this, v => v.Pot, out pot);
         }
-        
+
+        private void OnNextRound()
+        {
+            if (Game.CurrentRound.HasWinner)
+            {
+                var result = Game.GetResult();
+                var players = new Queue<Player>(result);
+                var player = players.Dequeue();
+                players.Enqueue(player);
+
+                Game = Game.StartNew(BettingRules.Standard, players.ToArray(), Deck.BuildStandard());
+                return;
+            }
+
+            Game = Game.NextRound();
+        }
+
         [Reactive]
         public Game Game { get; set; }
 
@@ -44,7 +60,7 @@ namespace OfflinePoker.Desktop
         private readonly ObservableAsPropertyHelper<int> pot;
 
         public ObservableCollection<PlayerViewModel> Players { get; }
-        public ReactiveCommand<Play, Unit> NextRoundCommand { get; set; }
+        public ReactiveCommand<Unit, Unit> NextRoundCommand { get; set; }
 
         [Reactive]
         public PlayOptionsViewModel PlayOptionsViewModel { get; set; }

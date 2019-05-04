@@ -29,6 +29,16 @@ namespace OfflinePoker.Domain
         public Player CurrentPlayer => ActivePlayers[CurrentRound.InTurn];
         public int Pot => Rounds.Aggregate(0, (p, r) => p + r.Pot);
 
+        public static Game StartNew(BettingRules rules, Player[] players, Deck deck)
+        {
+            var activePlayers = players
+                .Select(p => new Player(p.Name, deck.Take(2), true, p.Stack))
+                .ToArray();
+
+            var table = deck.Take(5);
+            return StartNew(rules, activePlayers, table);
+        }
+
         public static Game StartNew(BettingRules rules, Player[] players, Hand table)
         {
             if (players.Length < 2)
@@ -53,7 +63,6 @@ namespace OfflinePoker.Domain
 
             return new Game(rules, playersList, table, rounds);
         }
-
 
         public Game NextRound()
         {
@@ -86,7 +95,7 @@ namespace OfflinePoker.Domain
                         continue;
                     }
                 }
-                
+
                 result[i] = players[i];
             }
 
@@ -120,7 +129,7 @@ namespace OfflinePoker.Domain
             var player = Players.First(p => p.Name == name);
             if (!player.IsActive)
                 return RoundState.Inactive;
-            
+
             var index = ActivePlayers.IndexOf(player);
             return CurrentRound.GetPlayerState(index);
         }
@@ -131,6 +140,19 @@ namespace OfflinePoker.Domain
                 return Array.Empty<Play>();
 
             return CurrentRound.GetOptions(CurrentRound.InTurn);
+        }
+
+        public Player[] GetResult()
+        {
+            if (CurrentRound.HasWinner)
+            {
+                var winnerIndex = CurrentRound.ActivePlayers.Single();
+                var winner = ActivePlayers.ElementAt(winnerIndex);
+
+                return Players.Replace(winner, winner.WithStack(s => s + Pot)).ToArray();
+            }
+
+            throw new NotImplementedException();
         }
     }
 
