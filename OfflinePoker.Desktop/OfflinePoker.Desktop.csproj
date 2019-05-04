@@ -74,12 +74,20 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="PlayOptionsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="PlayerView.xaml.cs">
       <DependentUpon>PlayerView.xaml</DependentUpon>
     </Compile>
     <Compile Include="PlayerViewModel.cs" />
+    <Compile Include="PlayOptionsView.xaml.cs">
+      <DependentUpon>PlayOptionsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PlayOptionsViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

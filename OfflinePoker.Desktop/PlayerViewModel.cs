@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
 using System.Linq;
 using System.Reactive.Linq;
 using OfflinePoker.Domain;
@@ -9,23 +9,21 @@ namespace OfflinePoker.Desktop
 {
     public class PlayerViewModel : ReactiveObject
     {
-        private readonly MainViewModel viewModel;
-
-        public PlayerViewModel(string playerName, MainViewModel viewModel)
+        public PlayerViewModel(string playerName, IObservable<Game> observableGame)
         {
-            this.viewModel = viewModel;
             Name = playerName;
-
-            viewModel.WhenAnyValue(v => v.Game, g => g.GetPlayerState(playerName))
+            observableGame
+                .Select(s => s.GetPlayerState(playerName))
                 .ToProperty(this, p => p.RoundState, out roundState);
 
-            viewModel.WhenAnyValue(v => v.Game, g => g.Players.First(p => p.Name == playerName).Stack)
+            observableGame
+                .Select(g => g.Players.First(p => p.Name == playerName).Stack)
                 .ToProperty(this, p => p.Bank, out bank);
         }
 
         [Reactive]
         public string Name { get; set; }
-        
+
         public int Bank => bank.Value;
         private readonly ObservableAsPropertyHelper<int> bank;
 

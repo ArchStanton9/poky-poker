@@ -11,13 +11,13 @@
     d:DesignHeight="450" d:DesignWidth="800">
 
     <Grid>
-        <Border BorderThickness="2" BorderBrush="CornflowerBlue" CornerRadius="4">
+        <Border BorderThickness="1" BorderBrush="DarkGray" CornerRadius="2">
             <StackPanel Orientation="Horizontal">
-                <TextBlock Margin="5 2" x:Name="NameTextBox" Foreground="Black" />
+                <TextBlock Margin="5 2" x:Name="NameTextBox" />
                 <TextBlock Margin="5 2" x:Name="BankTextBox" />
 
-                <CheckBox Margin="10 2 5 2" x:Name="IsActiveCheckbox"/>
-                <CheckBox Margin="5 2" x:Name="InTurnCheckBox"/>
+                <CheckBox Margin="10 2 5 2" IsHitTestVisible="False" x:Name="IsActiveCheckbox" />
+                <CheckBox Margin="5 2" IsHitTestVisible="False" x:Name="InTurnCheckBox" />
 
                 <TextBlock Margin="5 2" x:Name="LastPlayBlock" />
                 <TextBlock Margin="5 2" x:Name="BetTextBlock" />

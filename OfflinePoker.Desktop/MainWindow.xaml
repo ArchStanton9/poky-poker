@@ -9,7 +9,7 @@
     <Grid Margin="0 30">
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="150"/>
+            <RowDefinition MinHeight="150" Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
@@ -19,35 +19,23 @@
                 <ColumnDefinition Width="200"/>
             </Grid.ColumnDefinitions>
 
-            <ItemsControl x:Name="PlayersList" Grid.Column="0">
+            <ItemsControl x:Name="PlayersList" Grid.Column="0" >
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <local:PlayerView ViewModel="{Binding}" />
+                        <local:PlayerView ViewModel="{Binding}" Margin="2" />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
 
             <Border 
                 Grid.Column="1"
-                Margin="10 0"
+                Margin="10 2"
                 BorderThickness="1"
                 BorderBrush="DarkGray"
                 CornerRadius="2" >
 
-                <StackPanel Margin="10 2" >
-                    <TextBox x:Name="BetTextBox" Margin="5 2" />
-                    <ItemsControl x:Name="PlaysList">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Button Click="ButtonBase_OnClick"
-                                        Margin="5 2"
-                                        Content="{Binding}"
-                                        CommandParameter="{Binding}" />
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                <local:PlayOptionsView x:Name="PlayOptionsView" Margin="10 2"/>
 
-                </StackPanel>
             </Border>
         </Grid>
 

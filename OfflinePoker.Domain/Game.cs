@@ -106,8 +106,11 @@ namespace OfflinePoker.Domain
             if (player.Name != CurrentPlayer.Name)
                 throw new GameOrderException($"Current player is {CurrentPlayer}");
 
-            var players = Players.Replace(player, player.WithStack(s => s - bet));
+            if (play == Play.Fold || play == Play.Check)
+                bet = 0;
+
             var rounds = Rounds.Replace(CurrentRound, CurrentRound.MakeAct(play, bet));
+            var players = Players.Replace(player, player.WithStack(s => s - bet));
 
             return new Game(Rules, players, Table, rounds);
         }
