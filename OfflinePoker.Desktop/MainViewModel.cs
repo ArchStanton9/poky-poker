@@ -32,30 +32,37 @@ namespace OfflinePoker.Desktop
 
             Game = Game.StartNew(BettingRules.Standard, players, deck.Take(5));
             Players = new ObservableCollection<PlayerViewModel>(
-                players.Select(p => new PlayerViewModel(p, this)));
+                players.Select(p => new PlayerViewModel(p.Name, this)));
 
             MakePlayCommand = ReactiveCommand
-                .Create<Play>(p =>
-                {
-                    Game = Game.MakeAct(p, Bet);
-                });
+                .Create<Play>(p => Game = Game.MakeAct(p, Bet));
+
+            NextRoundCommand = ReactiveCommand
+                .Create<Play>(p => Game = Game.NextRound());
 
             this.WhenAnyValue(v => v.Game)
                 .Subscribe(g => Bet = 0);
+
+            this.WhenAnyValue(v => v.Game, (Game g) => g.Pot)
+                .ToProperty(this, v => v.Pot, out pot);
 
             this.WhenAnyValue(v => v.Game)
                 .Subscribe(g =>
                 {
                     optionsSource.Clear();
-                    optionsSource.AddRange(g.CurrentRound.GetOptions(g.CurrentRound.InTurn));
+                    var opt = g.GetOptions();
+                    if (opt.Any())
+                        optionsSource.AddRange(opt);
                 });
         }
 
+        
         [Reactive]
         public Game Game { get; set; }
 
         [Reactive]
         public string CurrentPlayer { get; set; }
+
 
         [Reactive]
         public int Bet { get; set; }
@@ -63,8 +70,12 @@ namespace OfflinePoker.Desktop
         public ReadOnlyObservableCollection<Play> Options => options;
         private readonly ReadOnlyObservableCollection<Play> options;
 
+        public int Pot => pot.Value;
+        private readonly ObservableAsPropertyHelper<int> pot;
+
         public ObservableCollection<PlayerViewModel> Players { get; }
 
         public ReactiveCommand<Play, Unit> MakePlayCommand { get; set; }
+        public ReactiveCommand<Play, Unit> NextRoundCommand { get; set; }
     }
 }

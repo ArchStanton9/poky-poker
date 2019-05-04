@@ -7,18 +7,15 @@ namespace OfflinePoker.Domain.Tests
     public class RoundTests
     {
         private Round initialRound;
-        private BettingRules rules;
 
         [SetUp]
         public void SetUp()
         {
-            rules = new BettingRules
+            initialRound = new Round(new[]
             {
-                BigBlind = 40,
-                SmallBlind = 20
-            };
-
-            initialRound = Round.CreateInitial(rules, 2);
+                new Act(0, Play.Blind, 20),
+                new Act(1, Play.Blind, 40),
+            }, 2);
         }
 
         [Test]

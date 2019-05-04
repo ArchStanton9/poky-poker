@@ -6,32 +6,55 @@
         xmlns:local="clr-namespace:OfflinePoker.Desktop"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
+    <Grid Margin="0 30">
+
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="150"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <ItemsControl x:Name="PlayersList" Grid.Row="0">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <local:PlayerView ViewModel="{Binding}" />
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300"/>
+                <ColumnDefinition Width="200"/>
+            </Grid.ColumnDefinitions>
 
-        <ItemsControl x:Name="PlaysList" Grid.Row="1">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Button Click="ButtonBase_OnClick"
-                            Content="{Binding}"
-                            CommandParameter="{Binding}"/>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+            <ItemsControl x:Name="PlayersList" Grid.Column="0">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <local:PlayerView ViewModel="{Binding}" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
 
-        <TextBox x:Name="BetTextBox" Margin="5 2" Grid.Row="2" />
+            <Border 
+                Grid.Column="1"
+                Margin="10 0"
+                BorderThickness="1"
+                BorderBrush="DarkGray"
+                CornerRadius="2" >
+
+                <StackPanel Margin="10 2" >
+                    <TextBox x:Name="BetTextBox" Margin="5 2" />
+                    <ItemsControl x:Name="PlaysList">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Click="ButtonBase_OnClick"
+                                        Margin="5 2"
+                                        Content="{Binding}"
+                                        CommandParameter="{Binding}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <StackPanel Grid.Row="1" Margin="10 15" Width="400" HorizontalAlignment="Left">
+            <Button x:Name="NextRoundButton" Margin="5 2" Content="Next" />
+            <TextBlock x:Name="PotTextBlock" Margin="5 2" />
+        </StackPanel>
 
     </Grid>
 </Window>

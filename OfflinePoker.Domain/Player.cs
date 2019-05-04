@@ -1,6 +1,8 @@
-﻿namespace OfflinePoker.Domain
+﻿using System;
+
+namespace OfflinePoker.Domain
 {
-    public class Player
+    public struct Player
     {
         public Player(string name, Hand hand, bool active, int stack)
         {
@@ -20,7 +22,21 @@
             return new Player(Name, hand, IsActive, Stack);
         }
 
-        public Player Deactivate()
+        public Player WithStack(int stack)
+        {
+            if (stack == Stack)
+                return this;
+
+            return new Player(Name, Hand, IsActive, stack);
+        }
+
+        public Player WithStack(Func<int, int> stackFunc)
+        {
+            var stack = stackFunc(Stack);
+            return WithStack(stack);
+        }
+
+        public Player MakeInactive()
         {
             return new Player(Name, Hand, !IsActive, Stack);
         }

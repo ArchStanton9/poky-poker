@@ -25,6 +25,13 @@ namespace OfflinePoker.Desktop
 
                 this.Bind(ViewModel, v => v.Bet, v => v.BetTextBox.Text)
                     .DisposeWith(cleanup);
+
+                this.OneWayBind(ViewModel, v => v.Pot, v => v.PotTextBlock.Text,
+                        x => $"Pot : {x}")
+                    .DisposeWith(cleanup);
+
+                this.BindCommand(ViewModel, v => v.NextRoundCommand, v => v.NextRoundButton)
+                    .DisposeWith(cleanup);
             });
 
             ViewModel = new MainViewModel();

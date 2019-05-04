@@ -9,26 +9,26 @@ namespace OfflinePoker.Desktop
 {
     public class PlayerViewModel : ReactiveObject
     {
-        private readonly Player player;
         private readonly MainViewModel viewModel;
 
-        public PlayerViewModel(Player player, MainViewModel viewModel)
+        public PlayerViewModel(string playerName, MainViewModel viewModel)
         {
-            this.player = player;
             this.viewModel = viewModel;
-            Name = player.Name;
-            Bank = player.Stack;
+            Name = playerName;
 
-            viewModel.WhenAnyValue(v => v.Game, g => g.GetPlayerState(player.Name))
+            viewModel.WhenAnyValue(v => v.Game, g => g.GetPlayerState(playerName))
                 .ToProperty(this, p => p.RoundState, out roundState);
+
+            viewModel.WhenAnyValue(v => v.Game, g => g.Players.First(p => p.Name == playerName).Stack)
+                .ToProperty(this, p => p.Bank, out bank);
         }
 
         [Reactive]
         public string Name { get; set; }
-
-        [Reactive]
-        public int Bank { get; set; }
         
+        public int Bank => bank.Value;
+        private readonly ObservableAsPropertyHelper<int> bank;
+
         public RoundState RoundState => roundState.Value;
         private readonly ObservableAsPropertyHelper<RoundState> roundState;
     }

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using OfflinePoker.Domain.Exceptions;
 
@@ -6,7 +8,7 @@ namespace OfflinePoker.Domain
 {
     public class Game
     {
-        public Game(BettingRules rules, Player[] players, Hand table, Round[] rounds)
+        public Game(BettingRules rules, ImmutableArray<Player> players, Hand table, ImmutableArray<Round> rounds)
         {
             Rules = rules;
             Players = players;
@@ -16,19 +18,40 @@ namespace OfflinePoker.Domain
         }
 
         public BettingRules Rules { get; }
-        public IReadOnlyList<Player> Players { get; }
+        public ImmutableArray<Player> Players { get; }
         public Hand Table { get; }
-        public IReadOnlyList<Round> Rounds { get; }
+        public ImmutableArray<Round> Rounds { get; }
         public IList<Player> ActivePlayers { get; }
-        public Stage Stage => (Stage) Rounds.Count;
+        public Stage Stage => (Stage) Rounds.Length;
         public Round CurrentRound => Rounds.Last();
         public bool IsComplete => Stage == Stage.River && CurrentRound.IsComplete;
+
         public Player CurrentPlayer => ActivePlayers[CurrentRound.InTurn];
+        public int Pot => Rounds.Aggregate(0, (p, r) => p + r.Pot);
 
         public static Game StartNew(BettingRules rules, Player[] players, Hand table)
         {
-            var round = Round.CreateInitial(rules, players.Length);
-            return new Game(rules, players, table, new[] {round});
+            if (players.Length < 2)
+                throw new GameLogicException("Can't start round. Not enough players.");
+
+            var acts = new[]
+            {
+                new Act(0, Play.Blind, rules.SmallBlind),
+                new Act(1, Play.Blind, rules.BigBlind)
+            };
+
+            var round = new Round(acts, players.Length);
+            var rounds = ImmutableArray.Create(round);
+
+            var blindPlayers = new[]
+            {
+                players[0].WithStack(s => s - rules.SmallBlind),
+                players[1].WithStack(s => s - rules.BigBlind)
+            };
+
+            var playersList = blindPlayers.Concat(players.Skip(2)).ToImmutableArray();
+
+            return new Game(rules, playersList, table, rounds);
         }
 
 
@@ -42,30 +65,32 @@ namespace OfflinePoker.Domain
 
             var players = KeepActive(Players.ToArray(), CurrentRound.ActivePlayers);
             var next = Round.StartNew(players.Count(p => p.IsActive));
-            var rounds = Rounds.Append(next).ToArray();
+            var rounds = Rounds.Add(next);
 
             return new Game(Rules, players, Table, rounds);
         }
 
-        public Player[] KeepActive(Player[] players, IEnumerable<int> active)
+        public ImmutableArray<Player> KeepActive(IList<Player> players, IEnumerable<int> active)
         {
             var activePlayers = new HashSet<int>(active);
+            var result = new Player[players.Count];
 
             var activeIndex = 0;
-            for (int i = 0; i < players.Length; i++)
+            for (var i = 0; i < players.Count; i++)
             {
-                if (!players[i].IsActive)
-                    continue;
-
-                if (!activePlayers.Contains(activeIndex))
+                if (players[i].IsActive)
                 {
-                    players[i] = players[i].Deactivate();
+                    if (!activePlayers.Contains(activeIndex++))
+                    {
+                        result[i] = players[i].MakeInactive();
+                        continue;
+                    }
                 }
-
-                activeIndex++;
+                
+                result[i] = players[i];
             }
 
-            return players;
+            return result.ToImmutableArray();
         }
 
         public Game MakeAct(Play play, int bet = 0)
@@ -78,18 +103,13 @@ namespace OfflinePoker.Domain
             if (CurrentRound.IsComplete)
                 throw new GameOrderException("Can not make act. Round is complete");
 
-            if (player != CurrentPlayer)
+            if (player.Name != CurrentPlayer.Name)
                 throw new GameOrderException($"Current player is {CurrentPlayer}");
 
-            var round = CurrentRound.MakeAct(play, bet);
-            var copy = Rounds.ToArray();
-            copy[copy.Length - 1] = round;
+            var players = Players.Replace(player, player.WithStack(s => s - bet));
+            var rounds = Rounds.Replace(CurrentRound, CurrentRound.MakeAct(play, bet));
 
-            var game = new Game(Rules, Players.ToArray(), Table, copy);
-            if (game.CurrentRound.IsComplete)
-                return game.NextRound();
-
-            return game;
+            return new Game(Rules, players, Table, rounds);
         }
 
         public RoundState GetPlayerState(string name)
@@ -97,9 +117,17 @@ namespace OfflinePoker.Domain
             var player = Players.First(p => p.Name == name);
             if (!player.IsActive)
                 return RoundState.Inactive;
-
+            
             var index = ActivePlayers.IndexOf(player);
             return CurrentRound.GetPlayerState(index);
+        }
+
+        public Play[] GetOptions()
+        {
+            if (CurrentRound.IsComplete)
+                return Array.Empty<Play>();
+
+            return CurrentRound.GetOptions(CurrentRound.InTurn);
         }
     }
 

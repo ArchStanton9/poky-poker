@@ -9,7 +9,7 @@ namespace OfflinePoker.Domain
         private readonly Act[] acts;
         private readonly int playersCount;
 
-        private Round(Act[] acts, int playersCount)
+        public Round(Act[] acts, int playersCount)
         {
             this.acts = acts;
             this.playersCount = playersCount;
@@ -19,7 +19,7 @@ namespace OfflinePoker.Domain
         public int InTurn { get; }
         public IReadOnlyCollection<Act> Acts => acts;
         public int Pot => Acts.Count == 0 ? 0 : Acts.Aggregate(0, (s, a) => s + a.Bet);
-        public int MaxBet => Acts.Count == 0 ? 0 : Acts.Max(a => a.Bet);
+        public int MaxBet => Acts.Count == 0 ? 0 : Enumerable.Range(0, playersCount).Max(PlayerBet);
 
         public Play LastPlay(int player) => acts
             .Where(a => a.Player == player)
@@ -38,26 +38,15 @@ namespace OfflinePoker.Domain
 
         public bool HasWinner => ActivePlayers.Count() == 1;
 
-        public static Round CreateInitial(BettingRules rules, int playersCount)
-        {
-            if (playersCount < 2)
-                throw new GameLogicException("Can't start round. Not enough players.");
-
-            var acts = new[]
-            {
-                new Act(0, Play.Blind, rules.SmallBlind),
-                new Act(1, Play.Blind, rules.BigBlind)
-            };
-
-            return new Round(acts, playersCount);
-        }
-
         public static Round StartNew(int playersCount) =>
             new Round(new Act[0], playersCount);
 
         public bool IsComplete => InTurn < 0;
 
-        public Round MakeAct(Play play, int bet = 0) => MakeAct(InTurn, play, bet);
+        public Round MakeAct(Play play, int bet = 0)
+        {
+            return MakeAct(InTurn, play, bet);
+        }
 
         private Round MakeAct(int player, Play play, int bet)
         {
@@ -145,7 +134,7 @@ namespace OfflinePoker.Domain
                 {
                     return bet == MaxBet
                         ? new[] {Play.Check, Play.Raise}
-                        : new[] {Play.Call, Play.Fold};
+                        : new[] {Play.Call, Play.Raise, Play.Fold};
                 }
 
                 if (MaxBet == 0)

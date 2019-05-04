@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Text;
 using FluentAssertions;
 using NUnit.Framework;
@@ -51,6 +52,14 @@ namespace OfflinePoker.Domain.Tests
                 .NextRound()
                 .MakeAct(Play.Check)
                 .MakeAct(Play.Check);
+        }
+
+        [Test]
+        public void Small_blind_player_should_be_able_to_raise()
+        {
+            game.MakeAct(Play.Call, 40)
+                .GetOptions()
+                .Should().Contain(Play.Raise);
         }
     }
 }
