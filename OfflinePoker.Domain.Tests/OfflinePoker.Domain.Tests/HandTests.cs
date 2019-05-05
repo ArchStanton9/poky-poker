@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
@@ -9,41 +9,63 @@ namespace OfflinePoker.Domain.Tests
     [TestFixture]
     public class HandTests
     {
-        [Test]
-        public void Foo()
+        [TestCase("7S 7H", HandName.OnePair)]
+        [TestCase("7S 4D 7H", HandName.OnePair)]
+        [TestCase("KH AS QD AH", HandName.OnePair)]
+        [TestCase("KH AS QD AH 7D", HandName.OnePair)]
+
+        [TestCase("7S 7H 5C 5D 2S", HandName.TwoPair)]
+        [TestCase("7S 7H 5C 5H", HandName.TwoPair)]
+        [TestCase("3S 7S 5C 7H 5H", HandName.TwoPair)]
+
+        [TestCase("7S 7H 7C", HandName.ThreeOfAKind)]
+        [TestCase("7S 7H 4D 2H 7D", HandName.ThreeOfAKind)]
+
+        [TestCase("5S 5H 5C 5D AH", HandName.FourOfAKind)]
+        [TestCase("5S 5H AH 5C 5D", HandName.FourOfAKind)]
+        [TestCase("AH 5H 5C 5D 5S", HandName.FourOfAKind)]
+        [TestCase("5H 5S 5C 5D", HandName.FourOfAKind)]
+
+        [TestCase("5H 5S 5C 4D 4H", HandName.FullHouse)]
+        [TestCase("AD AH 5S 5C 5D", HandName.FullHouse)]
+
+        [TestCase("2D 3H 4S 5C 6D", HandName.Straight)]
+
+        [TestCase("JD AD 8D 10D 2D", HandName.Flush)]
+        
+        [TestCase("2D 3D 4D 5D 6D", HandName.StraightFlush)]
+        public void Can_find_hand_name(string handString, HandName name)
         {
-            Console.WriteLine(sizeof(short));
-
-
-            var hand = new Hand(
-                new Card(Rank.Seven, Suit.Hearts),
-                new Card(Rank.Seven, Suit.Clubs),
-                new Card(Rank.Ten, Suit.Diamonds)
-            );
-
+            var cards = CardsParser.ParseMany(handString);
+            var hand = new Hand(cards);
+            hand.Name.Should().Be(name);
         }
 
         [Test]
-        public void Pair_test()
+        public void PerfTest()
         {
-            var hand = new Hand(
-                new Card(Rank.Seven, Suit.Hearts),
-                new Card(Rank.Seven, Suit.Clubs),
-                new Card(Rank.Ten, Suit.Diamonds)
-            );
+            var hands = new[]
+                {
+                    "5S 5H AH 5C 5D",
+                    "2D 3D 4D 5D 6D",
+                    "JD AD 8D 10D 2D",
+                    "KH AS QD AH",
+                    "3S 7S 5C 7H 5H"
+                }.Select(CardsParser.ParseMany)
+                .ToArray();
 
-            // 7, 0
-            // 7, 3
-            // 10, 1
 
-            hand.Name.Should().Be(HandName.OnePair);
-        }
-
-        [Test]
-        public void Next_egde_test()
-        {
-            var array = new byte[] {5, 4, 4, 2, 1};
-            var l = Hand.ParseLayout(array);
+            var watch = Stopwatch.StartNew();
+            
+            for (var i = 0; i < 100000; i++)
+            {
+                foreach (var hand in hands)
+                {
+                    Hand.GetHandName(hand);
+                }
+            }
+            watch.Stop();
+            Console.WriteLine(watch.Elapsed);
         }
     }
 }

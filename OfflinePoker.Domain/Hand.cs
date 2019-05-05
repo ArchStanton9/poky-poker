@@ -82,41 +82,13 @@ namespace OfflinePoker.Domain
             var current = ranks[0];
             for (var i = 1; i < ranks.Length; i++)
             {
-                if (ranks[i] - current != 1)
+                if (current - ranks[i] != 1)
                     return false;
 
                 current = ranks[i];
             }
 
             return true;
-        }
-
-        private static int MaxRepeats(byte[] array, out byte upper)
-        {
-
-#if DEBUG
-            AssertSorted(array);
-#endif
-
-            var count = 1;
-            upper = array[0];
-            for (var i = 1; i < array.Length; i++)
-            {
-                if (upper == array[i])
-                {
-                    count++;
-                }
-                else
-                {
-                    if (count > 1)
-                        return count;
-
-                    upper = array[i];
-                    count = 1;
-                }
-            }
-
-            return count;
         }
 
         public static HandName CheckName(ArraySegment<byte> ranks)
