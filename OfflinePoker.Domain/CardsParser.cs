@@ -51,5 +51,10 @@ namespace OfflinePoker.Domain
             var chunks = text.Split(' ');
             return chunks.Select(Parse).ToArray();
         }
+
+        public static Hand ParseHand(string text)
+        {
+            return new Hand(ParseMany(text));
+        }
     }
 }

@@ -1,13 +1,16 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using OfflinePoker.Domain.Exceptions;
 
 namespace OfflinePoker.Domain
 {
-    public class Hand
+    public class Hand : IEnumerable<Card>
     {
         private readonly Card[] cards;
+        private readonly Lazy<HandName> name;
 
         public Hand(params Card[] cards)
         {
@@ -15,7 +18,7 @@ namespace OfflinePoker.Domain
                 throw new ArgumentException("Value cannot be an empty collection.", nameof(cards));
 
             this.cards = cards;
-            Name = GetHandName(cards);
+            name = new Lazy<HandName>(() => GetHandName(cards));
         }
 
         public Hand Add(Card card)
@@ -23,14 +26,162 @@ namespace OfflinePoker.Domain
             return new Hand(cards.Append(card).ToArray());
         }
 
-        public HandName Name { get; }
+        public HandName Name => name.Value;
 
         public override string ToString()
         {
             return Name.ToString();
         }
 
-        #region Helpers
+        #region Compare
+
+        private struct Swap
+        {
+            public Swap(int a, int b)
+            {
+                A = a;
+                B = b;
+            }
+
+            public readonly int A;
+            public readonly int B;
+
+            public override string ToString()
+            {
+                return $"{A} -> {B}";
+            }
+        }
+
+        private class TemporarySwap : IDisposable
+        {
+            private readonly Card[] table;
+            private readonly Card[] hand;
+            private readonly Swap[] swaps;
+
+            public TemporarySwap(Card[] table, Card[] hand, params Swap[] swaps)
+            {
+                this.table = table;
+                this.hand = hand;
+                this.swaps = swaps;
+
+                foreach (var swap in swaps)
+                {
+                    var temp = table[swap.B];
+                    table[swap.B] = hand[swap.A];
+                    hand[swap.A] = temp;
+                }
+            }
+
+            public void Dispose()
+            {
+                foreach (var swap in swaps)
+                {
+                    var temp = hand[swap.A];
+                    hand[swap.A] = table[swap.B];
+                    table[swap.B] = temp;
+                }
+            }
+        }
+
+        public Hand Combine(Hand table) => Combine(table.cards);
+
+        public Hand Combine(Card[] table)
+        {
+            if (cards.Length != 2)
+                throw new GameLogicException("Can combine only players hand of two cards");
+
+            switch (table.Length)
+            {
+                case 5: return CombineRiver(table);
+                case 4: return CombineTurn(table);
+                case 3: return new Hand(table[0], table[1], table[3], cards[0], cards[1]);
+                default:
+                    throw new GameLogicException("Can combine hand only with table cards");
+            }
+        }
+
+        private static readonly Lazy<IEnumerable<Swap[]>> riverSwaps
+            = new Lazy<IEnumerable<Swap[]>>(GetRiverSwaps);
+
+        private static List<Swap[]> GetRiverSwaps()
+        {
+            var table = new[] {0, 1, 2, 3, 4};
+            var hand = new[] {0, 1};
+
+            var swaps = table
+                .SelectMany(x => hand.Select(y => new Swap(y, x)))
+                .ToArray();
+
+            var options = new List<Swap[]>();
+
+            for (var i = 0; i < swaps.Length; i++)
+            {
+                for (var j = i + 1; j < swaps.Length; j++)
+                {
+                    var p1 = swaps[i];
+                    var p2 = swaps[j];
+
+                    if (p1.A != p2.A && p1.B != p2.B)
+                        options.Add(new[] {swaps[i], swaps[j]});
+                }
+            }
+
+            options.AddRange(swaps.Select(x => new[] {x}));
+
+            return options;
+        }
+
+        private Hand CombineRiver(Card[] table)
+        {
+            var bestHand = new Hand(table);
+            var bestHandName = bestHand.Name;
+            
+            foreach (var swap in riverSwaps.Value)
+            {
+                using (new TemporarySwap(table, cards, swap))
+                {
+                    var handName = GetHandName(table);
+                    if (handName > bestHandName)
+                    {
+                        bestHand = new Hand(table.ToArray());
+                        bestHandName = handName;
+                    }
+                }
+            }
+
+            return bestHand;
+        }
+
+        private static readonly Lazy<Swap[]> turnSwaps
+            = new Lazy<Swap[]>(() => Enumerable
+                .Range(0, 5)
+                .Select(i => new Swap(0, i))
+                .ToArray());
+
+        private Hand CombineTurn(Card[] table)
+        {
+            var bestHand = new Hand(cards[1], table[0], table[1], table[2], table[3]);
+            var bestHandName = bestHand.Name;
+            
+            foreach (var swap in turnSwaps.Value)
+            {
+                using (new TemporarySwap(table, cards, swap))
+                {
+                    var handName = GetHandName(table);
+                    if (handName > bestHandName)
+                    {
+                        bestHandName = handName;
+                        bestHand = new Hand(table.ToArray());
+                    }
+                }
+            }
+
+            return bestHand;
+        }
+
+        #endregion
+
+        #region HandName
 
         public static HandName GetHandName(Card[] cards)
         {
@@ -78,7 +229,7 @@ namespace OfflinePoker.Domain
 #if DEBUG
             AssertSorted(ranks);
 #endif
-            
+
             var current = ranks[0];
             for (var i = 1; i < ranks.Length; i++)
             {
@@ -171,7 +322,7 @@ namespace OfflinePoker.Domain
             if (!IsSorted(array))
                 throw new ArgumentException("Array is supposed to be sorted.", nameof(array));
         }
-        
+
 
         private static bool IsSorted(byte[] array)
         {
@@ -187,6 +338,20 @@ namespace OfflinePoker.Domain
             }
 
             return true;
+        }
+
+        #endregion
+
+        #region IEnumerable
+
+        public IEnumerator<Card> GetEnumerator()
+        {
+            return ((IList<Card>) cards).GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return cards.GetEnumerator();
         }
 
         #endregion

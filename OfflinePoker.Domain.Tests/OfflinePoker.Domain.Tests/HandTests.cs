@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
+using OfflinePoker.Domain.Tests.Utils;
 
 namespace OfflinePoker.Domain.Tests
 {
@@ -32,7 +33,7 @@ namespace OfflinePoker.Domain.Tests
         [TestCase("2D 3H 4S 5C 6D", HandName.Straight)]
 
         [TestCase("JD AD 8D 10D 2D", HandName.Flush)]
-        
+
         [TestCase("2D 3D 4D 5D 6D", HandName.StraightFlush)]
         public void Can_find_hand_name(string handString, HandName name)
         {
@@ -56,7 +57,7 @@ namespace OfflinePoker.Domain.Tests
 
 
             var watch = Stopwatch.StartNew();
-            
+
             for (var i = 0; i < 100000; i++)
             {
                 foreach (var hand in hands)
@@ -64,8 +65,38 @@ namespace OfflinePoker.Domain.Tests
                     Hand.GetHandName(hand);
                 }
             }
+
             watch.Stop();
             Console.WriteLine(watch.Elapsed);
+        }
+
+
+        [Test]
+        public void Can_combine_FullHouse_on_river()
+        {
+            var hand = CardsParser.ParseHand("QH AS");
+            var table = CardsParser.ParseMany("QD 8C AC AD 7S");
+
+            using (ConsoleStopWatch.StartNew())
+            {
+                hand = hand.Combine(table);
+            }
+
+            hand.Name.Should().Be(HandName.FullHouse);
+        }
+
+        [Test]
+        public void Can_combine_FourOfKind_on_turn()
+        {
+            var hand = CardsParser.ParseHand("QH AS");
+            var table = CardsParser.ParseMany("AH 8C AC AD 7S");
+
+            using (ConsoleStopWatch.StartNew())
+            {
+                hand = hand.Combine(table);
+            }
+
+            hand.Name.Should().Be(HandName.FourOfAKind);
         }
     }
 }
