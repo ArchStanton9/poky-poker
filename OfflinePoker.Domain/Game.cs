@@ -28,7 +28,7 @@ namespace OfflinePoker.Domain
 
         public Player CurrentPlayer => ActivePlayers[CurrentRound.InTurn];
         public int Pot => Rounds.Aggregate(0, (p, r) => p + r.Pot);
-
+        
         public static Game StartNew(BettingRules rules, Player[] players, Deck deck)
         {
             var activePlayers = players
@@ -144,6 +144,11 @@ namespace OfflinePoker.Domain
 
         public Player[] GetResult()
         {
+            if (Stage == Stage.River && CurrentRound.IsComplete && !CurrentRound.HasWinner)
+            {
+
+            }
+
             if (CurrentRound.HasWinner)
             {
                 var winnerIndex = CurrentRound.ActivePlayers.Single();
