@@ -31,6 +31,7 @@ namespace OfflinePoker.Domain.Tests
         [TestCase("AD AH 5S 5C 5D", HandName.FullHouse)]
 
         [TestCase("2D 3H 4S 5C 6D", HandName.Straight)]
+        [TestCase("2D 3H 4S 5C AD", HandName.Straight)]
 
         [TestCase("JD AD 8D 10D 2D", HandName.Flush)]
 

@@ -193,7 +193,7 @@ namespace OfflinePoker.Domain
             if (flash) return HandName.Flush;
             if (straight) return HandName.Straight;
 
-            return CheckName(new ArraySegment<byte>(ranks));
+            return CheckNameByLayout(new ArraySegment<byte>(ranks));
         }
 
         private static (byte[], byte[]) Decompose(Card[] cards)
@@ -210,7 +210,7 @@ namespace OfflinePoker.Domain
             return (ranks, suits);
         }
 
-        public static bool IsFlush(byte[] suits)
+        private static bool IsFlush(byte[] suits)
         {
             var current = suits[0];
             for (int i = 1; i < suits.Length; i++)
@@ -221,9 +221,8 @@ namespace OfflinePoker.Domain
 
             return true;
         }
-
-
-        public static bool IsStraight(byte[] ranks)
+        
+        private static bool IsStraight(byte[] ranks)
         {
 
 #if DEBUG
@@ -234,7 +233,12 @@ namespace OfflinePoker.Domain
             for (var i = 1; i < ranks.Length; i++)
             {
                 if (current - ranks[i] != 1)
-                    return false;
+                {
+                    const byte ace = (byte) Rank.Ace;
+                    const byte five = (byte) Rank.Five;
+                    if (current != ace || ranks[i] != five)
+                        return false;
+                }
 
                 current = ranks[i];
             }
@@ -242,7 +246,7 @@ namespace OfflinePoker.Domain
             return true;
         }
 
-        public static HandName CheckName(ArraySegment<byte> ranks)
+        private static HandName CheckNameByLayout(ArraySegment<byte> ranks)
         {
 #if DEBUG
             AssertSorted(ranks.Array);
@@ -263,7 +267,7 @@ namespace OfflinePoker.Domain
         };
 
 
-        public static int ParseLayout(ArraySegment<byte> segment)
+        private static int ParseLayout(ArraySegment<byte> segment)
         {
             var result = 0;
 
@@ -282,7 +286,7 @@ namespace OfflinePoker.Domain
             return result;
         }
 
-        public static ArraySegment<byte> Take(ArraySegment<byte> segment, out int count)
+        private static ArraySegment<byte> Take(ArraySegment<byte> segment, out int count)
         {
             Debug.Assert(segment.Array != null, "segment.Array != null");
 
@@ -300,7 +304,7 @@ namespace OfflinePoker.Domain
             return new ArraySegment<byte>(segment.Array, start, end);
         }
 
-        public static int NextEdge(ArraySegment<byte> segment)
+        private static int NextEdge(ArraySegment<byte> segment)
         {
             var array = segment.Array;
             if (array == null)
