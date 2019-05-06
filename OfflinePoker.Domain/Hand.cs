@@ -7,10 +7,9 @@ using OfflinePoker.Domain.Exceptions;
 
 namespace OfflinePoker.Domain
 {
-    public class Hand : IEnumerable<Card>
+    public class Hand : IEnumerable<Card>, IComparable<Hand>
     {
         private readonly Card[] cards;
-        private readonly Lazy<HandName> name;
 
         public Hand(params Card[] cards)
         {
@@ -18,7 +17,7 @@ namespace OfflinePoker.Domain
                 throw new ArgumentException("Value cannot be an empty collection.", nameof(cards));
 
             this.cards = cards;
-            name = new Lazy<HandName>(() => GetHandName(cards));
+            Name = GetHandName(cards);
         }
 
         public Hand Add(Card card)
@@ -26,14 +25,14 @@ namespace OfflinePoker.Domain
             return new Hand(cards.Append(card).ToArray());
         }
 
-        public HandName Name => name.Value;
+        public HandName Name { get; }
 
         public override string ToString()
         {
             return Name.ToString();
         }
 
-        #region Compare
+        #region Combine
 
         private struct Swap
         {
@@ -179,14 +178,20 @@ namespace OfflinePoker.Domain
             return bestHand;
         }
 
+        
+
         #endregion
 
         #region HandName
 
         public static HandName GetHandName(Card[] cards)
         {
-            var (ranks, suits) = Decompose(cards);
-            var flash = IsFlush(suits);
+            var ranks = cards
+                .Select(c => (byte)c.Rank)
+                .OrderByDescending(x => x)
+                .ToArray();
+
+            var flash = IsFlush(cards);
             var straight = IsStraight(ranks);
 
             if (flash && straight) return HandName.StraightFlush;
@@ -196,26 +201,13 @@ namespace OfflinePoker.Domain
             return CheckNameByLayout(new ArraySegment<byte>(ranks));
         }
 
-        private static (byte[], byte[]) Decompose(Card[] cards)
+
+        private static bool IsFlush(IReadOnlyList<Card> cards)
         {
-            var ranks = cards
-                .Select(c => (byte) c.Rank)
-                .OrderByDescending(x => x)
-                .ToArray();
-
-            var suits = cards
-                .Select(c => (byte) c.Suit)
-                .ToArray();
-
-            return (ranks, suits);
-        }
-
-        private static bool IsFlush(byte[] suits)
-        {
-            var current = suits[0];
-            for (int i = 1; i < suits.Length; i++)
+            var current = cards[0].Suit;
+            for (int i = 1; i < cards.Count; i++)
             {
-                if (current != suits[i])
+                if (current != cards[i].Suit)
                     return false;
             }
 
@@ -258,14 +250,36 @@ namespace OfflinePoker.Domain
 
         private static readonly Dictionary<int, HandName> layoutsMap = new Dictionary<int, HandName>
         {
+            {2111, HandName.OnePair},
+            {1211, HandName.OnePair},
+            {1121, HandName.OnePair},
+            {1112, HandName.OnePair},
+            {211, HandName.OnePair},
+            {121, HandName.OnePair},
+            {112, HandName.OnePair},
+            {21, HandName.OnePair},
+            {12, HandName.OnePair},
             {2, HandName.OnePair},
-            {3, HandName.ThreeOfAKind},
-            {4, HandName.FourOfAKind},
+            
+            {221, HandName.TwoPair},
+            {212, HandName.TwoPair},
+            {122, HandName.TwoPair},
             {22, HandName.TwoPair},
+
+            {311, HandName.ThreeOfAKind},
+            {131, HandName.ThreeOfAKind},
+            {113, HandName.ThreeOfAKind},
+            {13, HandName.ThreeOfAKind},
+            {31, HandName.ThreeOfAKind},
+            {3, HandName.ThreeOfAKind},
+            
+            {41, HandName.FourOfAKind},
+            {14, HandName.FourOfAKind},
+            {4, HandName.FourOfAKind},
+
             {32, HandName.FullHouse},
             {23, HandName.FullHouse}
         };
-
 
         private static int ParseLayout(ArraySegment<byte> segment)
         {
@@ -277,10 +291,10 @@ namespace OfflinePoker.Domain
                     return result;
 
                 segment = Take(segment, out var c);
-                if (c < 2)
-                    continue;
+                result += c * (int) Math.Pow(10, i);
 
-                result = result == 0 ? c : result * 10 + c;
+                if (segment.Count < 1)
+                    break;
             }
 
             return result;
@@ -345,7 +359,165 @@ namespace OfflinePoker.Domain
         }
 
         #endregion
+        
+        #region IComparable
 
+        public int CompareTo(Hand other)
+        {
+            var result = CompareByHandNames(this, other);
+            return result != 0 ? result : CompareByKickers(this, other);
+        }
+
+        private static int CompareByHandNames(Hand left, Hand right)
+        {
+            if (left.Name > right.Name)
+                return 1;
+            if (left.Name == right.Name)
+                return 0;
+
+            return -1;
+        }
+
+        private static int CompareByKickers(Hand left, Hand right)
+        {
+            if (left.Name != right.Name)
+                throw new GameLogicException("Can't compare hands by kickers. Names doesn't match.");
+
+            var l = left.GetKickers();
+            var r = right.GetKickers();
+
+            if (l.Length != r.Length)
+                throw new GameLogicException("Can't compare hands. Kicker sequences doesn't match.");
+
+            for (var i = 0; i < l.Length; i++)
+            {
+                if (l[i] == r[i])
+                    continue;
+
+                return l[i] > r[i] ? 1 : -1;
+            }
+
+            return 0;
+        }
+
+        private byte[] GetKickers()
+        {
+            var ranks = cards
+                .Select(c => (byte)c.Rank)
+                .OrderByDescending(x => x)
+                .ToArray();
+
+            switch (Name)
+            {
+                case HandName.Straight:
+                case HandName.Flush:
+                case HandName.StraightFlush:
+                    return new[] { ranks[0] };
+
+                case HandName.FourOfAKind:
+                    return FourOfKindKickers(ranks);
+
+                case HandName.FullHouse:
+                    return new[] { ranks[2] };
+
+                case HandName.ThreeOfAKind:
+                    return ThreeOfKindKickers(ranks);
+
+                case HandName.TwoPair:
+                    return TwoPairsKickers(ranks);
+
+                case HandName.OnePair:
+                    return OnePairKickers(ranks);
+            }
+
+            return ranks;
+        }
+
+        private static byte[] FourOfKindKickers(IReadOnlyList<byte> ranks)
+        {
+            if (ranks.Count == 4)
+                return new[] {ranks[0]};
+
+            return ranks[0] == ranks[1]
+                ? new[] {ranks[0], ranks[4]}
+                : new[] {ranks[4], ranks[0]};
+        }
+
+        private static byte[] ThreeOfKindKickers(byte[] ranks)
+        {
+            var layout = ParseLayout(new ArraySegment<byte>(ranks));
+            switch (layout)
+            {
+                case 311:
+                    return new[] {ranks[0], ranks[3], ranks[4]};
+                case 131:
+                    return new[] {ranks[1], ranks[0], ranks[4]};
+                case 113:
+                    return new[] {ranks[2], ranks[0], ranks[1]};
+                case 31:
+                    return new[] {ranks[0], ranks[3]};
+                case 13:
+                    return new[] {ranks[3], ranks[0]};
+                case 3:
+                    return new[] {ranks[0]};
+                default:
+                    throw new GameLogicException($"Unexpected layout '{layout}' for ThreeOfKind.");
+            }
+        }
+
+        private static byte[] TwoPairsKickers(byte[] ranks)
+        {
+            var layout = ParseLayout(new ArraySegment<byte>(ranks));
+            switch (layout)
+            {
+                case 221:
+                    return new[] {ranks[0], ranks[2], ranks[4]};
+                case 212:
+                    return new[] {ranks[0], ranks[4], ranks[2]};
+                case 122:
+                    return new[] {ranks[2], ranks[4], ranks[0]};
+                case 22:
+                    return new[] {ranks[0], ranks[2]};
+                default:
+                    throw new GameLogicException($"Unexpected layout '{layout}' for TwoPairs.");
+            }
+        }
+
+        private static byte[] OnePairKickers(byte[] ranks)
+        {
+            var layout = ParseLayout(new ArraySegment<byte>(ranks));
+            switch (layout)
+            {
+                case 2111:
+                    return new[] {ranks[0], ranks[2], ranks[3], ranks[4]};
+                case 1211:
+                    return new[] {ranks[1], ranks[0], ranks[3], ranks[4]};
+                case 1121:
+                    return new[] {ranks[2], ranks[0], ranks[1], ranks[4]};
+                case 1112:
+                    return new[] {ranks[3], ranks[0], ranks[1], ranks[2]};
+
+                case 211:
+                    return new[] {ranks[0], ranks[2], ranks[3]};
+                case 121:
+                    return new[] {ranks[1], ranks[0], ranks[3]};
+                case 112:
+                    return new[] {ranks[0], ranks[1], ranks[2]};
+
+                case 21:
+                    return new[] {ranks[0], ranks[2]};
+                case 12:
+                    return new[] {ranks[2], ranks[0]};
+
+                case 2:
+                    return new[] {ranks[0]};
+                default:
+                    throw new GameLogicException($"Unexpected layout '{layout}' for OnePair.");
+            }
+        }
+
+        #endregion
+        
         #region IEnumerable
 
         public IEnumerator<Card> GetEnumerator()

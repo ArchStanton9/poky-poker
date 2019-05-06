@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using FluentAssertions;
@@ -98,6 +99,12 @@ namespace OfflinePoker.Domain.Tests
             }
 
             hand.Name.Should().Be(HandName.FourOfAKind);
+        }
+
+        [Test]
+        public void Biba()
+        {
+           
         }
     }
 }
