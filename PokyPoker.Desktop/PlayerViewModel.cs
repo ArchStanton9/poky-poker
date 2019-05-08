@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
-using DynamicData;
 using PokyPoker.Domain;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -22,8 +20,30 @@ namespace PokyPoker.Desktop
                 .Select(g => g.Players.First(p => p.Name == playerName).Stack)
                 .ToProperty(this, p => p.Bank, out bank);
 
-            var hand = observableGame.Select(g => g.Players.First(p => p.Name == playerName).Hand);
-            Hand = new HandViewModel(hand);
+            Hand = new HandViewModel(observableGame.Select(GetHand), observableGame.Select(GetTable));
+        }
+
+        public Hand GetHand(Game game)
+        {
+            var player = game.Players.First(p => p.Name == Name);
+            return player.Hand;    
+        }
+
+        public static Card[] GetTable(Game game)
+        {
+            switch (game.Stage)
+            {
+                case Stage.PreFlop:
+                    return new Card[0];
+                case Stage.Flop:
+                    return game.Table.Take(3).ToArray();
+                case Stage.Turn:
+                    return game.Table.Take(4).ToArray();
+                case Stage.River:
+                    return game.Table.Take(5).ToArray();
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         [Reactive]

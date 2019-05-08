@@ -20,18 +20,19 @@ namespace PokyPoker.Desktop
                 new Player("p3", deck.Take(2), true, 2000),
             };
 
+            var gameObservable = this.WhenAnyValue(v => v.Game);
+
             Game = Game.StartNew(BettingRules.Standard, players, deck.Take(5));
+
+            Table = new TableViewModel(gameObservable);
             Players = new ObservableCollection<PlayerViewModel>(
-                players.Select(p => new PlayerViewModel(p.Name, this.WhenAnyValue(v => v.Game))));
+                players.Select(p => new PlayerViewModel(p.Name, gameObservable)));
 
             PlayOptionsViewModel = new PlayOptionsViewModel(
-                this.WhenAnyValue(v => v.Game),
+                gameObservable,
                 (play, bet) => Game = Game.MakeAct(play, bet));
 
             NextRoundCommand = ReactiveCommand.Create<Unit>(x => OnNextRound());
-
-            this.WhenAnyValue(v => v.Game, (Game g) => g.Pot)
-                .ToProperty(this, v => v.Pot, out pot);
         }
 
         private void OnNextRound()
@@ -52,15 +53,11 @@ namespace PokyPoker.Desktop
 
         [Reactive]
         public Game Game { get; set; }
-
-        [Reactive]
-        public string CurrentPlayer { get; set; }
-
-        public int Pot => pot.Value;
-        private readonly ObservableAsPropertyHelper<int> pot;
-
         public ObservableCollection<PlayerViewModel> Players { get; }
         public ReactiveCommand<Unit, Unit> NextRoundCommand { get; set; }
+
+        [Reactive]
+        public TableViewModel Table { get; set; }
 
         [Reactive]
         public PlayOptionsViewModel PlayOptionsViewModel { get; set; }

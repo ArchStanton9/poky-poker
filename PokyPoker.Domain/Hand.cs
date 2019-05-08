@@ -93,7 +93,7 @@ namespace PokyPoker.Domain
             {
                 case 5: return CombineRiver(table);
                 case 4: return CombineTurn(table);
-                case 3: return new Hand(table[0], table[1], table[3], cards[0], cards[1]);
+                case 3: return new Hand(table[0], table[1], table[2], cards[0], cards[1]);
                 default:
                     throw new GameLogicException("Can combine hand only with table cards");
             }
@@ -153,7 +153,7 @@ namespace PokyPoker.Domain
 
         private static readonly Lazy<Swap[]> turnSwaps
             = new Lazy<Swap[]>(() => Enumerable
-                .Range(0, 5)
+                .Range(0, 4)
                 .Select(i => new Swap(0, i))
                 .ToArray());
 

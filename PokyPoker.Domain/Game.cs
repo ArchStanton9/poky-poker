@@ -196,7 +196,7 @@ namespace PokyPoker.Domain
 
     public enum Stage
     {
-        PreFlop,
+        PreFlop = 1,
         Flop,
         Turn,
         River

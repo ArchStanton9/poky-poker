@@ -7,15 +7,26 @@ namespace PokyPoker.Desktop
 {
     public class HandViewModel : ReactiveObject
     {
-        public HandViewModel(IObservable<Hand> observableHand)
+        public HandViewModel(IObservable<Hand> observableHand, IObservable<Card[]> observableTable)
         {
-            observableHand
-                .Select(h => h.ToString())
-                .ToProperty(this, v => v.Name, out name);
-
             observableHand
                 .Select(HandFormatter.Format)
                 .ToProperty(this, v => v.Cards, out cards);
+
+            observableTable
+                .Select(GetHandName)
+                .ToProperty(this, v => v.Name, out name);
+        }
+
+        public string GetHandName(Card[] tableCards)
+        {
+            var hand = CardsParser.ParseHand(Cards);
+            if (tableCards.Length > 0)
+            {
+                hand = hand.Combine(tableCards);
+            }
+
+            return hand.Name.ToString();
         }
 
         public string Name => name.Value;
