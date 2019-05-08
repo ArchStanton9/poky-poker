@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Text;
 
 namespace PokyPoker.Domain
 {
@@ -22,6 +24,15 @@ namespace PokyPoker.Domain
             throw new FormatException("Unexpected card format");
         }
 
+        public static string ToString(Card card)
+        {
+            var sb = new StringBuilder(3);
+            sb.Append(ranksMapInverted[card.Rank]);
+            sb.Append(suitMapInverted[card.Suit]);
+
+            return sb.ToString();
+        }
+
         private static readonly Dictionary<char, Suit> suitMap = new Dictionary<char, Suit>()
         {
             {'H', Suit.Hearts},
@@ -30,11 +41,18 @@ namespace PokyPoker.Domain
             {'S', Suit.Spades}
         };
 
+        private static readonly Dictionary<Suit, char> suitMapInverted = suitMap
+            .ToDictionary(p => p.Value, p => p.Key);
+
         private static readonly Dictionary<string, Rank> ranksMap = BaseRanksMap
             .Concat(SpecialRanksMap)
             .ToDictionary(x => x.Key, x => x.Value);
 
-        private static Dictionary<string, Rank> BaseRanksMap => Enumerable.Range(2, 10)
+        private static readonly Dictionary<Rank, string> ranksMapInverted = BaseRanksMap
+            .Concat(SpecialRanksMap)
+            .ToDictionary(x => x.Value, x => x.Key);
+
+        private static Dictionary<string, Rank> BaseRanksMap => Enumerable.Range(2, 9)
             .ToDictionary(i => i.ToString(), i => (Rank) i);
 
         private static Dictionary<string, Rank> SpecialRanksMap => new Dictionary<string, Rank>

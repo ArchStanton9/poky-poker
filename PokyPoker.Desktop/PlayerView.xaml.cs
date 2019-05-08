@@ -1,6 +1,4 @@
 ﻿using System.Reactive.Disposables;
-using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media;
 using ReactiveUI;
 
@@ -42,6 +40,11 @@ namespace PokyPoker.Desktop
                 this.OneWayBind(ViewModel,
                         vm => vm.RoundState.Bet,
                         v => v.BetTextBlock.Text)
+                    .DisposeWith(cleanup);
+
+                this.OneWayBind(ViewModel,
+                        vm => vm.Hand,
+                        v => v.HandView.ViewModel)
                     .DisposeWith(cleanup);
             });
         }

@@ -191,12 +191,15 @@ namespace PokyPoker.Domain
                 .OrderByDescending(x => x)
                 .ToArray();
 
-            var flash = IsFlush(cards);
-            var straight = IsStraight(ranks);
+            if (ranks.Length == 5)
+            {
+                var flash = IsFlush(cards);
+                var straight = IsStraight(ranks);
 
-            if (flash && straight) return HandName.StraightFlush;
-            if (flash) return HandName.Flush;
-            if (straight) return HandName.Straight;
+                if (flash && straight) return HandName.StraightFlush;
+                if (flash) return HandName.Flush;
+                if (straight) return HandName.Straight;
+            }
 
             return CheckNameByLayout(new ArraySegment<byte>(ranks));
         }

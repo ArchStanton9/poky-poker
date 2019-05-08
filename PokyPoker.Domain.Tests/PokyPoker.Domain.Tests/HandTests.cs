@@ -11,6 +11,10 @@ namespace PokyPoker.Domain.Tests
     [TestFixture]
     public class HandTests
     {
+        [TestCase("7S AS", HandName.HighCard)]
+        [TestCase("7S 8S", HandName.HighCard)]
+        [TestCase("7S 8H", HandName.HighCard)]
+
         [TestCase("7S 7H", HandName.OnePair)]
         [TestCase("7S 4D 7H", HandName.OnePair)]
         [TestCase("KH AS QD AH", HandName.OnePair)]

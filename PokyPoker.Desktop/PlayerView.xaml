@@ -18,9 +18,10 @@
 
                 <CheckBox Margin="10 2 5 2" IsHitTestVisible="False" x:Name="IsActiveCheckbox" />
 
+                <local:HandView Margin="5 2" VerticalAlignment="Center" x:Name="HandView"/>
+ 
                 <TextBlock Margin="5 2" x:Name="LastPlayBlock" />
                 <TextBlock Margin="5 2" x:Name="BetTextBlock" />
-
             </StackPanel>
         </Border>
     </Grid>
