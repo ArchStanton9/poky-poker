@@ -186,10 +186,14 @@ namespace PokyPoker.Domain
 
         public static HandName GetHandName(Card[] cards)
         {
-            var ranks = cards
-                .Select(c => (byte)c.Rank)
-                .OrderByDescending(x => x)
-                .ToArray();
+            var ranks = new byte[cards.Length];
+            for (var i = 0; i < cards.Length; i++)
+            {
+                ranks[i] = (byte) cards[i].Rank;
+            }
+
+            Array.Sort(ranks);
+            Array.Reverse(ranks);
 
             if (ranks.Length == 5)
             {
