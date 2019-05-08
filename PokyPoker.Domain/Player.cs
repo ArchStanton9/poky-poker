@@ -22,6 +22,11 @@ namespace PokyPoker.Domain
             return new Player(Name, hand, IsActive, Stack);
         }
 
+        public Player WithHand(Func<Hand, Hand> handFunc)
+        {
+            return new Player(Name, handFunc(Hand), IsActive, Stack);
+        }
+
         public Player WithStack(int stack)
         {
             if (stack == Stack)

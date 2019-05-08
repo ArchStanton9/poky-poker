@@ -142,11 +142,44 @@ namespace PokyPoker.Domain
             return CurrentRound.GetOptions(CurrentRound.InTurn);
         }
 
+        public Player[] GetWinners(IList<Player> players)
+        {
+            var winners = new List<Player>();
+            foreach (var player in players.Select(p => p.WithHand(h => h.Combine(Table))))
+            {
+                if (winners.Count == 0)
+                {
+                    winners.Add(player);
+                    continue;
+                }
+
+                if (player.Hand > winners[0].Hand)
+                {
+                    winners.Clear();
+                }
+                else if (player.Hand < winners[0].Hand)
+                {
+                    continue;
+                }
+
+                winners.Add(player);
+            }
+
+            return Players
+                .Where(p => winners.Any(w => w.Name == p.Name))
+                .ToArray();
+        }
+
+
         public Player[] GetResult()
         {
             if (Stage == Stage.River && CurrentRound.IsComplete && !CurrentRound.HasWinner)
             {
-
+                var winners = GetWinners(ActivePlayers);
+                var gain = Pot / winners.Length;
+                return winners
+                    .Aggregate(Players, (c, w) => c.Replace(w, w.WithStack(s => s + gain)))
+                    .ToArray();
             }
 
             if (CurrentRound.HasWinner)

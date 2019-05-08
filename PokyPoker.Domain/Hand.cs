@@ -7,7 +7,7 @@ using PokyPoker.Domain.Exceptions;
 
 namespace PokyPoker.Domain
 {
-    public class Hand : IEnumerable<Card>, IComparable<Hand>
+    public class Hand : IEnumerable<Card>, IComparable<Hand>, IComparable
     {
         private readonly Card[] cards;
 
@@ -359,13 +359,40 @@ namespace PokyPoker.Domain
         }
 
         #endregion
-        
+
         #region IComparable
 
         public int CompareTo(Hand other)
         {
             var result = CompareByHandNames(this, other);
             return result != 0 ? result : CompareByKickers(this, other);
+        }
+
+        public int CompareTo(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return 1;
+            if (ReferenceEquals(this, obj)) return 0;
+            return obj is Hand other ? CompareTo(other) : throw new ArgumentException($"Object must be of type {nameof(Hand)}");
+        }
+
+        public static bool operator <(Hand left, Hand right)
+        {
+            return Comparer<Hand>.Default.Compare(left, right) < 0;
+        }
+
+        public static bool operator >(Hand left, Hand right)
+        {
+            return Comparer<Hand>.Default.Compare(left, right) > 0;
+        }
+
+        public static bool operator <=(Hand left, Hand right)
+        {
+            return Comparer<Hand>.Default.Compare(left, right) <= 0;
+        }
+
+        public static bool operator >=(Hand left, Hand right)
+        {
+            return Comparer<Hand>.Default.Compare(left, right) >= 0;
         }
 
         private static int CompareByHandNames(Hand left, Hand right)

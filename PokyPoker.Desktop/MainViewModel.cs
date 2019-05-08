@@ -36,7 +36,7 @@ namespace PokyPoker.Desktop
 
         private void OnNextRound()
         {
-            if (Game.CurrentRound.HasWinner)
+            if (Game.IsComplete)
             {
                 var result = Game.GetResult();
                 var players = new Queue<Player>(result);

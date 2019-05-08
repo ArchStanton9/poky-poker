@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using FluentAssertions;
@@ -98,6 +99,15 @@ namespace PokyPoker.Domain.Tests
             }
 
             hand.Name.Should().Be(HandName.FourOfAKind);
+        }
+
+        [Test]
+        public void Compare()
+        {
+            var hand1 = CardsParser.ParseHand("QH QS 7D 8D 2H");
+            var hand2 = CardsParser.ParseHand("QC QD 7S 8S 2D");
+
+            Console.Write(hand1.CompareTo(hand2));
         }
     }
 }
