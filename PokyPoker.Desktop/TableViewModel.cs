@@ -14,7 +14,7 @@ namespace PokyPoker.Desktop
                 .ToProperty(this, vm => vm.Pot, out pot);
 
             observableGame
-                .Select(g => HandFormatter.Format(g.Table))
+                .Select(g => HandFormatter.Format(g.GetCurrentTable()))
                 .ToProperty(this, vm => vm.Table, out table);
         }
 

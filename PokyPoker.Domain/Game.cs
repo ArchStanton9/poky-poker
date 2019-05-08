@@ -192,6 +192,23 @@ namespace PokyPoker.Domain
 
             throw new NotImplementedException();
         }
+
+        public Card[] GetCurrentTable()
+        {
+            switch (Stage)
+            {
+                case Stage.PreFlop:
+                    return new Card[0];
+                case Stage.Flop:
+                    return Table.Take(3).ToArray();
+                case Stage.Turn:
+                    return Table.Take(4).ToArray();
+                case Stage.River:
+                    return Table.Take(5).ToArray();
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
     }
 
     public enum Stage
