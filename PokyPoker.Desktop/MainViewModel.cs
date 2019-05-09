@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reactive;
 using PokyPoker.Domain;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -20,41 +19,44 @@ namespace PokyPoker.Desktop
                 new Player("p3", deck.Take(2), true, 2000),
             };
 
-            var gameObservable = this.WhenAnyValue(v => v.Game);
-
             Game = Game.StartNew(BettingRules.Standard, players, deck.Take(5));
 
-            Table = new TableViewModel(gameObservable);
+            var gameObservable = this.WhenAnyValue(v => v.Game);
             Players = new ObservableCollection<PlayerViewModel>(
                 players.Select(p => new PlayerViewModel(p.Name, gameObservable)));
 
-            PlayOptionsViewModel = new PlayOptionsViewModel(
-                gameObservable,
-                (play, bet) => Game = Game.MakeAct(play, bet));
-
-            NextRoundCommand = ReactiveCommand.Create<Unit>(x => OnNextRound());
+            Table = new TableViewModel(gameObservable);
+            PlayOptionsViewModel = new PlayOptionsViewModel(gameObservable, OnAct);
         }
 
-        private void OnNextRound()
+        private void OnAct(Play play, int bet) => Game = OnAct(Game, play, bet);
+
+        private static Game OnAct(Game game, Play play, int bet)
         {
-            if (Game.IsComplete)
+            game = game.MakeAct(play, bet);
+
+            if (game.IsComplete)
             {
-                var result = Game.GetResult();
+                var result = game.GetResult();
                 var players = new Queue<Player>(result);
                 var player = players.Dequeue();
                 players.Enqueue(player);
 
-                Game = Game.StartNew(BettingRules.Standard, players.ToArray(), Deck.BuildStandard());
-                return;
+                game = Game.StartNew(BettingRules.Standard, players.ToArray(), Deck.BuildStandard());
             }
 
-            Game = Game.NextRound();
+            if (game.CurrentRound.IsComplete)
+            {
+                game = game.NextRound();
+            }
+
+            return game;
         }
 
         [Reactive]
         public Game Game { get; set; }
+
         public ObservableCollection<PlayerViewModel> Players { get; }
-        public ReactiveCommand<Unit, Unit> NextRoundCommand { get; set; }
 
         [Reactive]
         public TableViewModel Table { get; set; }

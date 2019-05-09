@@ -41,7 +41,6 @@
 
         <StackPanel Grid.Row="1" Margin="10 15" Width="400" HorizontalAlignment="Left">
             <local:TableView Margin="5 2" x:Name="TableView"/>
-            <Button x:Name="NextRoundButton" Margin="5 2" Content="Next" />
         </StackPanel>
 
     </Grid>
