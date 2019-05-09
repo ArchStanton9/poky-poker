@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Text;
-using FluentAssertions;
+﻿using FluentAssertions;
 using NUnit.Framework;
+using PokyPoker.Domain.Tests.Utils;
 
 namespace PokyPoker.Domain.Tests
 {
@@ -60,6 +57,16 @@ namespace PokyPoker.Domain.Tests
             game.MakeAct(Play.Call, 40)
                 .GetOptions()
                 .Should().Contain(Play.Raise);
+        }
+
+        [Test]
+        public void Can_make_all_in_if_stack_to_low()
+        {
+            var options = GamesBuilder
+                .CreateNew(400, 500, 20)
+                .GetOptions();
+
+            options.Should().Contain(Play.AllIn);
         }
     }
 }

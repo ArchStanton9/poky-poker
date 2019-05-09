@@ -27,8 +27,40 @@ namespace PokyPoker.Domain
         public bool IsComplete => Stage == Stage.River && CurrentRound.IsComplete;
 
         public Player CurrentPlayer => ActivePlayers[CurrentRound.InTurn];
+
         public int Pot => Rounds.Aggregate(0, (p, r) => p + r.Pot);
-        
+
+        public int[] SubPots => GetSubPots(Rounds);
+
+        private static int[] GetSubPots(ImmutableArray<Round> rounds)
+        {
+            var initial = rounds[0].HasSubPots ? rounds[0].SubPots() : new[] {rounds[0].Pot};
+            var stack = new Stack<int>(initial);
+
+            for (var i = 1; i < rounds.Length; i++)
+            {
+                var round = rounds[i];
+                if (round.HasSubPots)
+                {
+                    var subPots = round.SubPots();
+                    stack.Push(subPots[0] + stack.Pop());
+                    for (var j = 1; j < subPots.Length; j++)
+                    {
+                        stack.Push(subPots[i]);
+                    }
+
+                    if (subPots.Length == 1)
+                        stack.Push(0);
+                }
+                else
+                {
+                    stack.Push(stack.Pop() + round.Pot);
+                }
+            }
+
+            return stack.Reverse().ToArray();
+        }
+
         public static Game StartNew(BettingRules rules, Player[] players, Deck deck)
         {
             var activePlayers = players
@@ -115,6 +147,10 @@ namespace PokyPoker.Domain
             if (player.Name != CurrentPlayer.Name)
                 throw new GameOrderException($"Current player is {CurrentPlayer}");
 
+            var options = GetOptions();
+            if (!options.Contains(play))
+                throw new GameLogicException($"Player is not supposed to make '{play}'");
+
             if (play == Play.Fold || play == Play.Check)
                 bet = 0;
 
@@ -139,7 +175,14 @@ namespace PokyPoker.Domain
             if (CurrentRound.IsComplete)
                 return Array.Empty<Play>();
 
-            return CurrentRound.GetOptions(CurrentRound.InTurn);
+            var options = CurrentRound.GetOptions().ToImmutableArray();
+
+            if (CurrentRound.MaxBet >= CurrentPlayer.Stack)
+            {
+                options = options.Replace(Play.Call, Play.AllIn);
+            }
+
+            return options.ToArray();
         }
 
         public Player[] GetWinners(IList<Player> players)

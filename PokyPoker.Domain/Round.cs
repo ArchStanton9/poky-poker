@@ -19,18 +19,27 @@ namespace PokyPoker.Domain
         public int InTurn { get; }
         public IReadOnlyCollection<Act> Acts => acts;
         public int Pot => Acts.Count == 0 ? 0 : Acts.Aggregate(0, (s, a) => s + a.Bet);
-        public int MaxBet => Acts.Count == 0 ? 0 : Enumerable.Range(0, playersCount).Max(PlayerBet);
+        public int MaxBet => GetMaxBet(acts);
+        
+        private static int GetMaxBet(IReadOnlyCollection<Act> acts) => acts.Count == 0
+            ? 0
+            : acts
+                .GroupBy(a => a.Player)
+                .Max(g => g.Sum(x => x.Bet));
 
-        public Play LastPlay(int player) => acts
-            .Where(a => a.Player == player)
-            .Select(a => a.Play)
-            .LastOrDefault();
+        public Play LastPlay(int player) => LastPlay(acts, player);
+        private static Play LastPlay(IEnumerable<Act> acts, int player) =>
+            acts.Where(a => a.Player == player)
+                .Select(a => a.Play)
+                .LastOrDefault();
 
-        public int PlayerBet(int player) => acts
-            .Where(a => a.Player == player)
-            .Aggregate(0, (s, a) => s + a.Bet);
 
-        public bool IsActive(int player) => LastPlay(player) != Play.Fold;
+        public int PlayerBet(int player) => PlayerBet(acts, player);
+        private static int PlayerBet(IEnumerable<Act> acts, int player) =>
+            acts.Where(a => a.Player == player)
+                .Aggregate(0, (s, a) => s + a.Bet);
+
+        public bool IsActive(int player) => LastPlay(acts, player) != Play.Fold;
 
         public IEnumerable<int> ActivePlayers => Enumerable
             .Range(0, playersCount)
@@ -55,10 +64,6 @@ namespace PokyPoker.Domain
 
             if (!ShouldAct(player))
                 throw new GameLogicException("Current actor is not supposed to act.");
-
-            var options = GetOptions(player);
-            if (!options.Contains(play))
-                throw new GameLogicException($"Actor is not supposed to make '{play}'");
 
             if (play == Play.Bet)
             {
@@ -123,6 +128,8 @@ namespace PokyPoker.Domain
             }
         }
 
+        public Play[] GetOptions() => GetOptions(InTurn);
+
         public Play[] GetOptions(int player)
         {
             var lastPlay = LastPlay(player);
@@ -148,6 +155,59 @@ namespace PokyPoker.Domain
             }
 
             return new Play[0];
+        }
+
+        public bool HasSubPots => Enumerable
+            .Range(0, playersCount)
+            .Select(LastPlay)
+            .Any(p => p == Play.AllIn);
+
+        public int[] SubPots()
+        {
+            var allInBets = Enumerable
+                .Range(0, playersCount)
+                .Where(p => LastPlay(p) == Play.AllIn)
+                .Select(PlayerBet)
+                .OrderBy(b => b)
+                .ToArray();
+
+            if (allInBets.Length == 0)
+                return new int[0];
+
+            var bets = acts
+                .GroupBy(a => a.Player, a => a.Bet)
+                .ToDictionary(a => a.Key, a => a.Sum());
+
+            var queue = new Queue<int>(playersCount);
+            var maxAllInBet = 0;
+            var pot = 0;
+            foreach (var bet in allInBets)
+            {
+                var x = bet - maxAllInBet;
+                maxAllInBet = x;
+                foreach (var player in Enumerable.Range(0, playersCount))
+                {
+                    if (bets[player] <= x)
+                    {
+                        pot += bets[player];
+                        bets[player] = 0;
+                    }
+                    else
+                    {
+                        bets[player] -= x;
+                        pot += x;
+                    }
+                }
+
+                queue.Enqueue(pot);
+                pot = 0;
+            }
+
+            var remain = bets.Sum(b => b.Value);
+            if (remain > 0)
+                queue.Enqueue(remain);
+
+            return queue.ToArray();
         }
 
         public RoundState GetPlayerState(int player) =>
