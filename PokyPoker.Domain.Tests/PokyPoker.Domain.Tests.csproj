@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\PokyPoker.Domain\PokyPoker.Domain.csproj" />
+    <ProjectReference Include="..\PokyPoker.Domain\PokyPoker.Domain.csproj" />
   </ItemGroup>
 
 </Project>

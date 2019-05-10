@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PokyPoker.Domain", "PokyPok
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PokyPoker.ConsoleApp", "PokyPoker.ConsoleApp\PokyPoker.ConsoleApp.csproj", "{CB16D9F4-7182-4933-AF5B-06AC46C37BDD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PokyPoker.Domain.Tests", "PokyPoker.Domain.Tests\PokyPoker.Domain.Tests\PokyPoker.Domain.Tests.csproj", "{0408E0E2-FABC-4EA4-B501-5A17D8A1314A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PokyPoker.Domain.Tests", "PokyPoker.Domain.Tests\PokyPoker.Domain.Tests.csproj", "{0408E0E2-FABC-4EA4-B501-5A17D8A1314A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokyPoker.Desktop", "PokyPoker.Desktop\PokyPoker.Desktop.csproj", "{988B2FFE-33AB-441A-BC2B-372ED523FE45}"
 EndProject
