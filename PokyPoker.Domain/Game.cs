@@ -137,7 +137,7 @@ namespace PokyPoker.Domain
             return new Game(Rules, players, Table, rounds);
         }
 
-        public RoundState GetPlayerState(byte id)
+        public RoundState GetPlayerState(int id)
         {
             var player = Players.First(p => p.Id == id);
             if (!player.IsActive)
@@ -167,34 +167,6 @@ namespace PokyPoker.Domain
             }
 
             return options.ToArray();
-        }
-
-        private Player[] GetWinners(IEnumerable<Player> players)
-        {
-            var winners = new List<Player>();
-            foreach (var player in players.Select(p => p.WithHand(h => h.Combine(Table))))
-            {
-                if (winners.Count == 0)
-                {
-                    winners.Add(player);
-                    continue;
-                }
-
-                if (player.Hand > winners[0].Hand)
-                {
-                    winners.Clear();
-                }
-                else if (player.Hand < winners[0].Hand)
-                {
-                    continue;
-                }
-
-                winners.Add(player);
-            }
-
-            return Players
-                .Where(p => winners.Any(w => w.Id == p.Id))
-                .ToArray();
         }
 
         private IEnumerable<Player> TakeContributors(IDictionary<int, int> bets) => bets
@@ -261,24 +233,60 @@ namespace PokyPoker.Domain
         public Player[] GetResult()
         {
             var pots = SplitPot();
-            var result = Players;
+            var result = Players.ToArray();
 
             foreach (var pot in pots)
             {
                 if (pot.Contenders.Count() == 1)
                 {
                     var winner = pot.Contenders.Single();
-                    result = result.Replace(winner, winner.WithStack(s => s + pot));
+                    var index = Array.FindIndex(result, p => p.Id == winner.Id);
+                    result[index] = winner.WithStack(s => s + pot);
+                    continue;
                 }
 
-                var winners = GetWinners(Players);
-                var gain = pot / winners.Length;
-                result = winners
-                    .Aggregate(result, (c, w) => c.Replace(w, w.WithStack(s => s + gain)))
-                    .ToImmutableArray();
+                var winners = GetWinners(Players)
+                    .Select(p => p.Id)
+                    .ToImmutableHashSet();
+
+                var gain = pot / winners.Count;
+
+                for (var i = 0; i < Players.Length; i++)
+                {
+                    if (winners.Contains(Players[i].Id))
+                    {
+                        result[i] = result[i].WithStack(s => s + gain);
+                    }
+                }
             }
 
-            return result.ToArray();
+            return result;
+        }
+
+        private IEnumerable<Player> GetWinners(IEnumerable<Player> players)
+        {
+            var winners = new List<Player>();
+            foreach (var player in players.Select(p => p.WithHand(h => h.Combine(Table))))
+            {
+                if (winners.Count == 0)
+                {
+                    winners.Add(player);
+                    continue;
+                }
+
+                if (player.Hand > winners.First().Hand)
+                {
+                    winners.Clear();
+                }
+                else if (player.Hand < winners.First().Hand)
+                {
+                    continue;
+                }
+
+                winners.Add(player);
+            }
+
+            return winners;
         }
 
 

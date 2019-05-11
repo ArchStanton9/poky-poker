@@ -2,9 +2,9 @@
 
 namespace PokyPoker.Domain
 {
-    public struct Player
+    public class Player
     {
-        public Player(byte id, Hand hand, bool active, int stack)
+        public Player(int id, Hand hand, bool active, int stack)
         {
             Id = id;
             Hand = hand;
@@ -12,7 +12,7 @@ namespace PokyPoker.Domain
             Stack = stack;
         }
 
-        public byte Id { get; }
+        public int Id { get; }
         public Hand Hand { get; }
         public bool IsActive { get; }
         public int Stack { get; }

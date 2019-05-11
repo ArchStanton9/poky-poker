@@ -9,7 +9,7 @@ namespace PokyPoker.Desktop
 {
     public class PlayerViewModel : ReactiveObject
     {
-        public PlayerViewModel(byte playerSpot, IObservable<Game> observableGame)
+        public PlayerViewModel(int playerSpot, IObservable<Game> observableGame)
         {
             Name = $"p{playerSpot}";
             observableGame
