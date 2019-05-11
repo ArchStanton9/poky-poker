@@ -4,27 +4,27 @@ namespace PokyPoker.Domain
 {
     public struct Player
     {
-        public Player(string name, Hand hand, bool active, int stack)
+        public Player(byte id, Hand hand, bool active, int stack)
         {
-            Name = name;
+            Id = id;
             Hand = hand;
             IsActive = active;
             Stack = stack;
         }
 
-        public string Name { get; }
+        public byte Id { get; }
         public Hand Hand { get; }
         public bool IsActive { get; }
         public int Stack { get; }
 
         public Player WithHand(Hand hand)
         {
-            return new Player(Name, hand, IsActive, Stack);
+            return new Player(Id, hand, IsActive, Stack);
         }
 
         public Player WithHand(Func<Hand, Hand> handFunc)
         {
-            return new Player(Name, handFunc(Hand), IsActive, Stack);
+            return new Player(Id, handFunc(Hand), IsActive, Stack);
         }
 
         public Player WithStack(int stack)
@@ -32,7 +32,7 @@ namespace PokyPoker.Domain
             if (stack == Stack)
                 return this;
 
-            return new Player(Name, Hand, IsActive, stack);
+            return new Player(Id, Hand, IsActive, stack);
         }
 
         public Player WithStack(Func<int, int> stackFunc)
@@ -43,7 +43,7 @@ namespace PokyPoker.Domain
 
         public Player MakeInactive()
         {
-            return new Player(Name, Hand, !IsActive, Stack);
+            return new Player(Id, Hand, !IsActive, Stack);
         }
     }
 }

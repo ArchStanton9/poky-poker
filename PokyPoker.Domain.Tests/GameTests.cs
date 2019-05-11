@@ -18,9 +18,9 @@ namespace PokyPoker.Domain.Tests
         {
             var deck = Deck.BuildStandard();
 
-            p1 = new Player("p1", deck.Take(2), true, 5000);
-            p2 = new Player("p2", deck.Take(2), true, 4000);
-            p3 = new Player("p3", deck.Take(2), true, 6000);
+            p1 = new Player(0, deck.Take(2), true, 5000);
+            p2 = new Player(1, deck.Take(2), true, 4000);
+            p3 = new Player(2, deck.Take(2), true, 6000);
 
             rules = new BettingRules
             {
@@ -37,7 +37,7 @@ namespace PokyPoker.Domain.Tests
         [Test]
         public void Left_for_big_blind_should_act_first()
         {
-            game.CurrentPlayer.Name.Should().Be(p3.Name);
+            game.CurrentPlayer.Id.Should().Be(p3.Id);
         }
 
         [Test]

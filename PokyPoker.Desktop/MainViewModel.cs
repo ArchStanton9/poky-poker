@@ -14,16 +14,16 @@ namespace PokyPoker.Desktop
             var deck = Deck.BuildStandard();
             var players = new[]
             {
-                new Player("p1", deck.Take(2), true, 4000),
-                new Player("p2", deck.Take(2), true, 5000),
-                new Player("p3", deck.Take(2), true, 2000),
+                new Player(0, deck.Take(2), true, 4000),
+                new Player(1, deck.Take(2), true, 5000),
+                new Player(2, deck.Take(2), true, 2000),
             };
 
             Game = Game.StartNew(BettingRules.Standard, players, deck.Take(5));
 
             var gameObservable = this.WhenAnyValue(v => v.Game);
             Players = new ObservableCollection<PlayerViewModel>(
-                players.Select(p => new PlayerViewModel(p.Name, gameObservable)));
+                players.Select(p => new PlayerViewModel(p.Id, gameObservable)));
 
             Table = new TableViewModel(gameObservable);
             PlayOptionsViewModel = new PlayOptionsViewModel(gameObservable, OnAct);

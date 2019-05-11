@@ -8,9 +8,9 @@ namespace PokyPoker.Domain.Tests.Utils
         {
             var deck = Deck.BuildStandard();
 
-            var id = 0;
+            byte id = 0;
             var players = stacks
-                .Select(s => new Player((++id).ToString(), deck.Take(2), true, s))
+                .Select(s => new Player(id++, deck.Take(2), true, s))
                 .ToArray();
 
             return Game.StartNew(BettingRules.Standard, players, deck);

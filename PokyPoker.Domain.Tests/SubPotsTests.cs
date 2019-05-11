@@ -11,9 +11,9 @@ namespace PokyPoker.Domain.Tests
         public void Single_AllIn()
         {
             var round = Round.StartNew(3)
-                .MakeAct(Play.Bet, 150)
-                .MakeAct(Play.AllIn, 40)
-                .MakeAct(Play.Call, 150);
+                .MakeAct(0, Play.Bet, 150)
+                .MakeAct(1, Play.AllIn, 40)
+                .MakeAct(2, Play.Call, 150);
 
             round.SubPots().Should().ContainInOrder(120, 340 - 120);
         }
@@ -22,10 +22,10 @@ namespace PokyPoker.Domain.Tests
         public void Second_AllIns()
         {
             var round = Round.StartNew(4)
-                .MakeAct(Play.Bet, 150)
-                .MakeAct(Play.AllIn, 40)
-                .MakeAct(Play.AllIn, 50)
-                .MakeAct(Play.Call, 150);
+                .MakeAct(0, Play.Bet, 150)
+                .MakeAct(1, Play.AllIn, 40)
+                .MakeAct(2, Play.AllIn, 50)
+                .MakeAct(3, Play.Call, 150);
 
             round.SubPots().Should().ContainInOrder(160, 30, 390 - 160 - 30);
         }
@@ -33,7 +33,7 @@ namespace PokyPoker.Domain.Tests
         [Test]
         public void SubPotsOnFlop()
         {
-            var game = GamesBuilder.CreateNew(500, 200, 300)
+            var game = GamesBuilder.CreateNew(500, 200, 660)
                 .MakeAct(Play.Raise, 100)
                 .MakeAct(Play.Call, 80)
                 .MakeAct(Play.Call, 60)

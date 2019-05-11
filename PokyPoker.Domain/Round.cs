@@ -1,4 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using PokyPoker.Domain.Exceptions;
 
@@ -13,10 +16,8 @@ namespace PokyPoker.Domain
         {
             this.acts = acts;
             this.playersCount = playersCount;
-            InTurn = acts.Length == 0 ? 0 : NextActor(acts.Last().Player);
         }
 
-        public int InTurn { get; }
         public IReadOnlyCollection<Act> Acts => acts;
         public int Pot => Acts.Count == 0 ? 0 : Acts.Aggregate(0, (s, a) => s + a.Bet);
         public int MaxBet => GetMaxBet(acts);
@@ -27,7 +28,11 @@ namespace PokyPoker.Domain
                 .GroupBy(a => a.Player)
                 .Max(g => g.Sum(x => x.Bet));
 
+
+        [Pure]
         public Play LastPlay(int player) => LastPlay(acts, player);
+        
+        [Pure]
         private static Play LastPlay(IEnumerable<Act> acts, int player) =>
             acts.Where(a => a.Player == player)
                 .Select(a => a.Play)
@@ -39,73 +44,71 @@ namespace PokyPoker.Domain
             acts.Where(a => a.Player == player)
                 .Aggregate(0, (s, a) => s + a.Bet);
 
-        public bool IsActive(int player) => LastPlay(acts, player) != Play.Fold;
+        public bool IsActive(int player) => LastPlay(acts, player) != Play.Fold && LastPlay(acts, player) != Play.AllIn;
 
-        public IEnumerable<int> ActivePlayers => Enumerable
-            .Range(0, playersCount)
-            .Where(IsActive);
+        public IEnumerable<int> ActivePlayers => Players.Where(IsActive);
 
         public bool HasWinner => ActivePlayers.Count() == 1;
 
         public static Round StartNew(int playersCount) =>
             new Round(new Act[0], playersCount);
 
-        public bool IsComplete => InTurn < 0;
+        public bool IsComplete => Players.Count() == playersCount && Players.Count(ShouldAct) == 0;
 
-        public Round MakeAct(Play play, int bet = 0)
+        private IEnumerable<int> Players => acts.Select(a => a.Player).Distinct();
+
+        private bool IsAllowedToAct(int player)
         {
-            return MakeAct(InTurn, play, bet);
+            var players = Players.ToImmutableSortedSet();
+            if (players.Contains(player))
+            {
+                var lastPlay = LastPlay(player);
+                if (lastPlay == Play.Fold || lastPlay == Play.AllIn)
+                    throw new GameOrderException($"Player is not supposed to make act after '{lastPlay}'");
+
+                foreach (var otherPlayer in players)
+                {
+                    if (otherPlayer >= player)
+                        break;
+
+                    if (ShouldAct(otherPlayer))
+                        throw new GameOrderException($"Wrong acts sequence. Expected act from player #{otherPlayer}");
+                }
+            }
+            else
+            {
+                if (players.Count == playersCount)
+                    throw new GameStateException("Can't make act. Players limit for round is exceed");
+            }
+
+            return true;
         }
 
-        private Round MakeAct(int player, Play play, int bet)
+
+        public Round MakeAct(Act act)
         {
-            if (player != InTurn)
-                throw new GameOrderException($"Can not make the act. Current actor is {InTurn}");
+            Debug.Assert(IsAllowedToAct(act.Player));
 
-            if (!ShouldAct(player))
-                throw new GameLogicException("Current actor is not supposed to act.");
-
-            if (play == Play.Bet)
+            switch (act.Play)
             {
-                if (MaxBet != 0)
+                case Play.Bet when MaxBet != 0:
                     throw new GameLogicException($"Can not make '{Play.Bet}'. Round is already open.");
-            }
 
-            if (play == Play.Raise)
-            {
-                if (bet <= MaxBet)
+                case Play.Raise when act.Bet <= MaxBet:
                     throw new GameLogicException($"Can not make '{Play.Raise}'. Wager is to low.");
-            }
 
-            if (play == Play.Call)
-            {
-                var playerBet = PlayerBet(player);
-                if (playerBet + bet != MaxBet)
-                    throw new GameLogicException("Call is not matching.");
+                case Play.Call:
+                {
+                    var playerBet = PlayerBet(act.Player);
+                    if (playerBet + act.Bet != MaxBet)
+                        throw new GameLogicException("Call is not matching.");
+                    break;
+                }
             }
-
-            var act = new Act(player, play, bet);
 
             return new Round(acts.Append(act).ToArray(), playersCount);
         }
 
-        public int NextActor(int lastActor)
-        {
-            if (lastActor < 0)
-                return 0;
-
-            for (var i = lastActor + 1; i < playersCount; i++)
-            {
-                if (ShouldAct(i)) return i;
-            }
-
-            for (var i = 0; i < lastActor + 1; i++)
-            {
-                if (ShouldAct(i)) return i;
-            }
-
-            return -1;
-        }
 
         public bool ShouldAct(int player)
         {
@@ -127,8 +130,6 @@ namespace PokyPoker.Domain
                 }
             }
         }
-
-        public Play[] GetOptions() => GetOptions(InTurn);
 
         public Play[] GetOptions(int player)
         {
@@ -157,15 +158,13 @@ namespace PokyPoker.Domain
             return new Play[0];
         }
 
-        public bool HasSubPots => Enumerable
-            .Range(0, playersCount)
+        public bool HasSubPots => Players
             .Select(LastPlay)
             .Any(p => p == Play.AllIn);
 
         public int[] SubPots()
         {
-            var allInBets = Enumerable
-                .Range(0, playersCount)
+            var allInBets = Players
                 .Where(p => LastPlay(p) == Play.AllIn)
                 .Select(PlayerBet)
                 .OrderBy(b => b)
@@ -185,7 +184,7 @@ namespace PokyPoker.Domain
             {
                 var x = bet - maxAllInBet;
                 maxAllInBet = x;
-                foreach (var player in Enumerable.Range(0, playersCount))
+                foreach (var player in Players)
                 {
                     if (bets[player] <= x)
                     {
@@ -209,14 +208,5 @@ namespace PokyPoker.Domain
 
             return queue.ToArray();
         }
-
-        public RoundState GetPlayerState(int player) =>
-            new RoundState
-            {
-                Bet = PlayerBet(player),
-                IsActive = IsActive(player),
-                IsCurrent = InTurn == player,
-                LastPlay = LastPlay(player)
-            };
     }
 }

@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using NUnit.Framework;
 using PokyPoker.Domain.Exceptions;
+using PokyPoker.Domain.Tests.Utils;
 
 namespace PokyPoker.Domain.Tests
 {
@@ -22,8 +23,8 @@ namespace PokyPoker.Domain.Tests
         public void Can_complete()
         {
             initialRound = initialRound
-                .MakeAct(Play.Call, 20)
-                .MakeAct(Play.Check);
+                .MakeAct(0, Play.Call, 20)
+                .MakeAct(1, Play.Check);
 
             initialRound.IsComplete.Should().BeTrue();
         }
@@ -31,7 +32,7 @@ namespace PokyPoker.Domain.Tests
         [Test]
         public void Can_call_for_big_blind()
         {
-            initialRound.Invoking(r => r.MakeAct(Play.Call, 20))
+            initialRound.Invoking(r => r.MakeAct(0, Play.Call, 20))
                 .Should().NotThrow<GameException>();
         }
 
@@ -39,12 +40,11 @@ namespace PokyPoker.Domain.Tests
         public void Can_Complete_round_with_3_players()
         {
             var round = Round.StartNew(3)
-                .MakeAct(Play.Bet, 5)
-                .MakeAct(Play.Fold)
-                .MakeAct(Play.Call, 5);
+                .MakeAct(0, Play.Bet, 5)
+                .MakeAct(1, Play.Fold)
+                .MakeAct(2, Play.Call, 5);
 
             round.IsComplete.Should().BeTrue();
         }
-
     }
 }

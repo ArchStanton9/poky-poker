@@ -24,7 +24,7 @@ namespace PokyPoker.Desktop
             observableGame.Subscribe(game =>
             {
                 var round = game.CurrentRound;
-                Bet = round.MaxBet - round.PlayerBet(round.InTurn);
+                Bet = round.MaxBet - round.PlayerBet(game.CurrentPlayer.Id);
 
                 optionsSource.Clear();
                 var opt = game.GetOptions();

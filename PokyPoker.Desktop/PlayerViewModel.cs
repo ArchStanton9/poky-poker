@@ -9,24 +9,21 @@ namespace PokyPoker.Desktop
 {
     public class PlayerViewModel : ReactiveObject
     {
-        public PlayerViewModel(string playerName, IObservable<Game> observableGame)
+        public PlayerViewModel(byte playerSpot, IObservable<Game> observableGame)
         {
-            Name = playerName;
+            Name = $"p{playerSpot}";
             observableGame
-                .Select(s => s.GetPlayerState(playerName))
+                .Select(s => s.GetPlayerState(playerSpot))
                 .ToProperty(this, p => p.RoundState, out roundState);
 
             observableGame
-                .Select(g => g.Players.First(p => p.Name == playerName).Stack)
+                .Select(g => g.Players.First(p => p.Id == playerSpot).Stack)
                 .ToProperty(this, p => p.Bank, out bank);
 
-            Hand = new HandViewModel(observableGame.Select(GetHand), observableGame.Select(g => g.GetCurrentTable()));
-        }
-
-        public Hand GetHand(Game game)
-        {
-            var player = game.Players.First(p => p.Name == Name);
-            return player.Hand;
+            Hand = new HandViewModel(
+                observableGame.Select(g => g.Players.First(p => p.Id == playerSpot).Hand),
+                observableGame.Select(g => g.GetCurrentTable())
+            );
         }
 
         [Reactive]

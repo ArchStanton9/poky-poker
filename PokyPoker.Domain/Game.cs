@@ -14,23 +14,25 @@ namespace PokyPoker.Domain
             Players = players;
             Table = table;
             Rounds = rounds;
-            ActivePlayers = Players.Where(p => p.IsActive).ToArray();
         }
 
         public BettingRules Rules { get; }
         public ImmutableArray<Player> Players { get; }
         public Hand Table { get; }
         public ImmutableArray<Round> Rounds { get; }
-        public IList<Player> ActivePlayers { get; }
+
+
+        public IList<Player> ActivePlayers => Players.Where(p => p.IsActive).ToArray();
         public Stage Stage => (Stage) Rounds.Length;
         public Round CurrentRound => Rounds.Last();
         public bool IsComplete => Stage == Stage.River && CurrentRound.IsComplete;
-
-        public Player CurrentPlayer => ActivePlayers[CurrentRound.InTurn];
-
         public int Pot => Rounds.Aggregate(0, (p, r) => p + r.Pot);
-
         public int[] SubPots => GetSubPots(Rounds);
+
+        public Player CurrentPlayer => ActivePlayers
+            .OrderBy(p => CurrentRound.LastPlay(p.Id))
+            .ThenBy(p => p.Id)
+            .First(p => CurrentRound.ShouldAct(p.Id));
 
         private static int[] GetSubPots(ImmutableArray<Round> rounds)
         {
@@ -64,7 +66,7 @@ namespace PokyPoker.Domain
         public static Game StartNew(BettingRules rules, Player[] players, Deck deck)
         {
             var activePlayers = players
-                .Select(p => new Player(p.Name, deck.Take(2), true, p.Stack))
+                .Select(p => new Player(p.Id, deck.Take(2), true, p.Stack))
                 .ToArray();
 
             var table = deck.Take(5);
@@ -144,7 +146,7 @@ namespace PokyPoker.Domain
             if (CurrentRound.IsComplete)
                 throw new GameOrderException("Can not make act. Round is complete");
 
-            if (player.Name != CurrentPlayer.Name)
+            if (player.Id != CurrentPlayer.Id)
                 throw new GameOrderException($"Current player is {CurrentPlayer}");
 
             var options = GetOptions();
@@ -154,20 +156,26 @@ namespace PokyPoker.Domain
             if (play == Play.Fold || play == Play.Check)
                 bet = 0;
 
-            var rounds = Rounds.Replace(CurrentRound, CurrentRound.MakeAct(play, bet));
+            var act = new Act(player.Id, play, bet);
+            var rounds = Rounds.Replace(CurrentRound, CurrentRound.MakeAct(act));
             var players = Players.Replace(player, player.WithStack(s => s - bet));
 
             return new Game(Rules, players, Table, rounds);
         }
 
-        public RoundState GetPlayerState(string name)
+        public RoundState GetPlayerState(byte id)
         {
-            var player = Players.First(p => p.Name == name);
+            var player = Players.First(p => p.Id == id);
             if (!player.IsActive)
                 return RoundState.Inactive;
 
-            var index = ActivePlayers.IndexOf(player);
-            return CurrentRound.GetPlayerState(index);
+            return new RoundState
+            {
+                Bet = CurrentRound.PlayerBet(id),
+                IsActive = true,
+                IsCurrent = id == CurrentPlayer.Id,
+                LastPlay = CurrentRound.LastPlay(id)
+            };
         }
 
         public Play[] GetOptions()
@@ -175,11 +183,13 @@ namespace PokyPoker.Domain
             if (CurrentRound.IsComplete)
                 return Array.Empty<Play>();
 
-            var options = CurrentRound.GetOptions().ToImmutableArray();
+            var options = CurrentRound.GetOptions(CurrentPlayer.Id).ToImmutableArray();
 
             if (CurrentRound.MaxBet >= CurrentPlayer.Stack)
             {
-                options = options.Replace(Play.Call, Play.AllIn);
+                options = options
+                    .Replace(Play.Call, Play.AllIn)
+                    .Remove(Play.Raise);
             }
 
             return options.ToArray();
@@ -209,7 +219,7 @@ namespace PokyPoker.Domain
             }
 
             return Players
-                .Where(p => winners.Any(w => w.Name == p.Name))
+                .Where(p => winners.Any(w => w.Id == p.Id))
                 .ToArray();
         }
 
