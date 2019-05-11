@@ -157,56 +157,5 @@ namespace PokyPoker.Domain
 
             return new Play[0];
         }
-
-        public bool HasSubPots => Players
-            .Select(LastPlay)
-            .Any(p => p == Play.AllIn);
-
-        public int[] SubPots()
-        {
-            var allInBets = Players
-                .Where(p => LastPlay(p) == Play.AllIn)
-                .Select(PlayerBet)
-                .OrderBy(b => b)
-                .ToArray();
-
-            if (allInBets.Length == 0)
-                return new int[0];
-
-            var bets = acts
-                .GroupBy(a => a.Player, a => a.Bet)
-                .ToDictionary(a => a.Key, a => a.Sum());
-
-            var queue = new Queue<int>(playersCount);
-            var maxAllInBet = 0;
-            var pot = 0;
-            foreach (var bet in allInBets)
-            {
-                var x = bet - maxAllInBet;
-                maxAllInBet = x;
-                foreach (var player in Players)
-                {
-                    if (bets[player] <= x)
-                    {
-                        pot += bets[player];
-                        bets[player] = 0;
-                    }
-                    else
-                    {
-                        bets[player] -= x;
-                        pot += x;
-                    }
-                }
-
-                queue.Enqueue(pot);
-                pot = 0;
-            }
-
-            var remain = bets.Sum(b => b.Value);
-            if (remain > 0)
-                queue.Enqueue(remain);
-
-            return queue.ToArray();
-        }
     }
 }

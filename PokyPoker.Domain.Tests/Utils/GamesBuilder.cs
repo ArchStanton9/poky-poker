@@ -4,7 +4,11 @@ namespace PokyPoker.Domain.Tests.Utils
 {
     public static class GamesBuilder
     {
-        public static Game CreateNew(params int[] stacks)
+        public static Game Create(params int[] stacks) => Create(BettingRules.Standard, stacks);
+
+        public static Game CreateNoBlinds(params int[] stacks) => Create(BettingRules.NoBlinds, stacks);
+
+        public static Game Create(BettingRules rules, params int[] stacks)
         {
             var deck = Deck.BuildStandard();
 
@@ -13,7 +17,7 @@ namespace PokyPoker.Domain.Tests.Utils
                 .Select(s => new Player(id++, deck.Take(2), true, s))
                 .ToArray();
 
-            return Game.StartNew(BettingRules.Standard, players, deck);
+            return Game.StartNew(rules, players, deck);
         }
     }
 }

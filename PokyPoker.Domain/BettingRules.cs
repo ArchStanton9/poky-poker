@@ -11,5 +11,7 @@
             SmallBlind = 20,
             BigBlind = 40
         };
+
+        public static readonly BettingRules NoBlinds = new BettingRules();
     }
 }

@@ -21,46 +21,78 @@ namespace PokyPoker.Domain
         public Hand Table { get; }
         public ImmutableArray<Round> Rounds { get; }
 
-
         public IList<Player> ActivePlayers => Players.Where(p => p.IsActive).ToArray();
         public Stage Stage => (Stage) Rounds.Length;
         public Round CurrentRound => Rounds.Last();
         public bool IsComplete => Stage == Stage.River && CurrentRound.IsComplete;
-        public int Pot => Rounds.Aggregate(0, (p, r) => p + r.Pot);
-        public int[] SubPots => GetSubPots(Rounds);
+
+        public Pot MainPot => SplitPot().Take(1).Single();
+        public IEnumerable<Pot> SidePots => SplitPot().Skip(1);
 
         public Player CurrentPlayer => ActivePlayers
             .OrderBy(p => CurrentRound.LastPlay(p.Id))
             .ThenBy(p => p.Id)
             .First(p => CurrentRound.ShouldAct(p.Id));
 
-        private static int[] GetSubPots(ImmutableArray<Round> rounds)
+        private IEnumerable<Player> TakeContributors(IDictionary<int, int> bets) => bets
+            .Where(b => b.Value > 0)
+            .Select(b => Players[b.Key]);
+
+        public IEnumerable<Pot> SplitPot()
         {
-            var initial = rounds[0].HasSubPots ? rounds[0].SubPots() : new[] {rounds[0].Pot};
-            var stack = new Stack<int>(initial);
+            var acts = Rounds.SelectMany(r => r.Acts).ToArray();
+            var playersBets = Players.ToDictionary(p => (int) p.Id, p => 0);
 
-            for (var i = 1; i < rounds.Length; i++)
+            var allInBets = new List<int>();
+            foreach (var act in acts)
             {
-                var round = rounds[i];
-                if (round.HasSubPots)
-                {
-                    var subPots = round.SubPots();
-                    stack.Push(subPots[0] + stack.Pop());
-                    for (var j = 1; j < subPots.Length; j++)
-                    {
-                        stack.Push(subPots[i]);
-                    }
-
-                    if (subPots.Length == 1)
-                        stack.Push(0);
-                }
-                else
-                {
-                    stack.Push(stack.Pop() + round.Pot);
-                }
+                playersBets[act.Player] += act.Bet;
+                if (act.Play == Play.AllIn)
+                    allInBets.Add(playersBets[act.Player]);
             }
 
-            return stack.Reverse().ToArray();
+            if (!allInBets.Any())
+            {
+                var maxBet = playersBets.Max(p => p.Value);
+                yield return Pot.Create(
+                    playersBets.Where(p => p.Value == maxBet).Select(p => Players[p.Key]),
+                    acts.Sum(a => a.Bet));
+                yield break;
+            }
+
+            allInBets.Sort();
+            var players = TakeContributors(playersBets).ToArray();
+
+            var contribution = 0;
+            foreach (var bet in allInBets)
+            {
+                var contenders = new HashSet<Player>();
+                var amount = 0;
+                contribution = bet - contribution;
+
+                foreach (var player in players)
+                {
+                    if (playersBets[player.Id] >= contribution)
+                    {
+                        contenders.Add(player);
+                        playersBets[player.Id] -= contribution;
+                        amount += contribution;
+                    }
+                    else
+                    {
+                        amount += playersBets[player.Id];
+                        playersBets[player.Id] = 0;
+                    }
+                }
+
+                var pot = new Pot(amount, contenders);
+                yield return pot;
+            }
+
+            yield return Pot.Create(
+                TakeContributors(playersBets),
+                playersBets.Sum(b => b.Value)
+            );
         }
 
         public static Game StartNew(BettingRules rules, Player[] players, Deck deck)
@@ -77,6 +109,9 @@ namespace PokyPoker.Domain
         {
             if (players.Length < 2)
                 throw new GameLogicException("Can't start round. Not enough players.");
+
+            if (rules.BigBlind == 0)
+                return new Game(rules, players.ToImmutableArray(), table, ImmutableArray.Create(Round.StartNew(players.Length)));
 
             var acts = new[]
             {
@@ -195,7 +230,7 @@ namespace PokyPoker.Domain
             return options.ToArray();
         }
 
-        public Player[] GetWinners(IList<Player> players)
+        public Player[] GetWinners(IEnumerable<Player> players)
         {
             var winners = new List<Player>();
             foreach (var player in players.Select(p => p.WithHand(h => h.Combine(Table))))
@@ -223,27 +258,27 @@ namespace PokyPoker.Domain
                 .ToArray();
         }
 
-
         public Player[] GetResult()
         {
-            if (Stage == Stage.River && CurrentRound.IsComplete && !CurrentRound.HasWinner)
+            var pots = SplitPot();
+            var result = Players;
+
+            foreach (var pot in pots)
             {
-                var winners = GetWinners(ActivePlayers);
-                var gain = Pot / winners.Length;
-                return winners
-                    .Aggregate(Players, (c, w) => c.Replace(w, w.WithStack(s => s + gain)))
-                    .ToArray();
+                if (pot.Contenders.Count() == 1)
+                {
+                    var winner = pot.Contenders.Single();
+                    result = result.Replace(winner, winner.WithStack(s => s + pot));
+                }
+
+                var winners = GetWinners(Players);
+                var gain = pot / winners.Length;
+                result = winners
+                    .Aggregate(result, (c, w) => c.Replace(w, w.WithStack(s => s + gain)))
+                    .ToImmutableArray();
             }
 
-            if (CurrentRound.HasWinner)
-            {
-                var winnerIndex = CurrentRound.ActivePlayers.Single();
-                var winner = ActivePlayers.ElementAt(winnerIndex);
-
-                return Players.Replace(winner, winner.WithStack(s => s + Pot)).ToArray();
-            }
-
-            throw new NotImplementedException();
+            return result.ToArray();
         }
 
         public Card[] GetCurrentTable()

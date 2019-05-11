@@ -10,7 +10,7 @@ namespace PokyPoker.Desktop
         public TableViewModel(IObservable<Game> observableGame)
         {
             observableGame
-                .Select(g => g.Pot)
+                .Select(g => g.MainPot.Amount)
                 .ToProperty(this, vm => vm.Pot, out pot);
 
             observableGame

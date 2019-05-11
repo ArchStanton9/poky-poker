@@ -63,7 +63,7 @@ namespace PokyPoker.Domain.Tests
         public void Can_make_all_in_if_stack_to_low()
         {
             var options = GamesBuilder
-                .CreateNew(400, 500, 20)
+                .Create(400, 500, 20)
                 .GetOptions();
 
             options.Should().Contain(Play.AllIn);
