@@ -443,10 +443,12 @@ namespace PokyPoker.Domain
 
             switch (Name)
             {
-                case HandName.Straight:
                 case HandName.Flush:
+                    return new [] { ranks[0] };
+
+                case HandName.Straight:
                 case HandName.StraightFlush:
-                    return new[] { ranks[0] };
+                    return StraightKickers(ranks);
 
                 case HandName.FourOfAKind:
                     return FourOfKindKickers(ranks);
@@ -465,6 +467,14 @@ namespace PokyPoker.Domain
             }
 
             return ranks;
+        }
+
+        private static byte[] StraightKickers(IReadOnlyList<byte> ranks)
+        {
+            if (ranks[1] == 5)
+                return new byte[] { 5 };
+            else
+                return new byte[] {ranks[0]};
         }
 
         private static byte[] FourOfKindKickers(IReadOnlyList<byte> ranks)

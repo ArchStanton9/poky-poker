@@ -105,13 +105,19 @@ namespace PokyPoker.Domain.Tests
             hand.Name.Should().Be(HandName.FourOfAKind);
         }
 
-        [Test]
-        public void Compare()
+        [TestCase("QH QS 7D 8D 2H", "QC QD 7S 8S 2D", 0)]
+        [TestCase("QH QS", "AC AD", -1)]
+        [TestCase("KH KS", "JC JD", 1)]
+        [TestCase("7H 7S 7D", "7C 7S 7D", 0)]
+        [TestCase("7H 7S 7D KH", "7C JS 7D 2S", 1)]
+        [TestCase("4H 6H AH JH 2H", "5C 6S 7D 4S 3D", 1)]
+        [TestCase("AH KC QS JH 10H", "AC 2S 3D 4S 5D", 1)]
+        public void Compare(string h1, string h2, int expected)
         {
-            var hand1 = CardsParser.ParseHand("QH QS 7D 8D 2H");
-            var hand2 = CardsParser.ParseHand("QC QD 7S 8S 2D");
+            var hand1 = CardsParser.ParseHand(h1);
+            var hand2 = CardsParser.ParseHand(h2);
 
-            Console.Write(hand1.CompareTo(hand2));
+            hand1.CompareTo(hand2).Should().Be(expected);
         }
     }
 }
