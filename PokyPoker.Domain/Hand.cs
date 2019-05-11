@@ -223,10 +223,7 @@ namespace PokyPoker.Domain
         
         private static bool IsStraight(byte[] ranks)
         {
-
-#if DEBUG
-            AssertSorted(ranks);
-#endif
+            Debug.Assert(IsSorted(ranks));
 
             var current = ranks[0];
             for (var i = 1; i < ranks.Length; i++)
@@ -247,9 +244,7 @@ namespace PokyPoker.Domain
 
         private static HandName CheckNameByLayout(ArraySegment<byte> ranks)
         {
-#if DEBUG
-            AssertSorted(ranks.Array);
-#endif
+            Debug.Assert(IsSorted(ranks.Array));
 
             var layout = ParseLayout(ranks);
             return layoutsMap.TryGetValue(layout, out var name) ? name : HandName.HighCard;
@@ -342,13 +337,6 @@ namespace PokyPoker.Domain
             return i;
         }
 
-        private static void AssertSorted(byte[] array)
-        {
-            if (!IsSorted(array))
-                throw new ArgumentException("Array is supposed to be sorted.", nameof(array));
-        }
-
-
         private static bool IsSorted(byte[] array)
         {
             if (array.Length == 0) throw new ArgumentException("Value cannot be an empty collection.", nameof(array));
@@ -357,7 +345,7 @@ namespace PokyPoker.Domain
             for (var i = 1; i < array.Length; i++)
             {
                 if (current < array[i])
-                    return false;
+                    throw new ArgumentException("Array is supposed to be sorted.", nameof(array));
 
                 current = array[i];
             }
@@ -469,13 +457,8 @@ namespace PokyPoker.Domain
             return ranks;
         }
 
-        private static byte[] StraightKickers(IReadOnlyList<byte> ranks)
-        {
-            if (ranks[1] == 5)
-                return new byte[] { 5 };
-            else
-                return new byte[] {ranks[0]};
-        }
+        private static byte[] StraightKickers(IReadOnlyList<byte> ranks) =>
+            ranks[1] == 5 ? new byte[] {5} : new[] {ranks[0]};
 
         private static byte[] FourOfKindKickers(IReadOnlyList<byte> ranks)
         {
