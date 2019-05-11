@@ -24,8 +24,8 @@ namespace PokyPoker.Domain
         public IList<Player> ActivePlayers => Players.Where(p => p.IsActive).ToArray();
         public Stage Stage => (Stage) Rounds.Length;
         public Round CurrentRound => Rounds.Last();
+        public Card[] CurrentTable => CropTable(Table, Stage);
         public bool IsComplete => Stage == Stage.River && CurrentRound.IsComplete;
-
         public Pot MainPot => SplitPot().Take(1).Single();
         public IEnumerable<Pot> SidePots => SplitPot().Skip(1);
 
@@ -33,67 +33,6 @@ namespace PokyPoker.Domain
             .OrderBy(p => CurrentRound.LastPlay(p.Id))
             .ThenBy(p => p.Id)
             .First(p => CurrentRound.ShouldAct(p.Id));
-
-        private IEnumerable<Player> TakeContributors(IDictionary<int, int> bets) => bets
-            .Where(b => b.Value > 0)
-            .Select(b => Players[b.Key]);
-
-        public IEnumerable<Pot> SplitPot()
-        {
-            var acts = Rounds.SelectMany(r => r.Acts).ToArray();
-            var playersBets = Players.ToDictionary(p => (int) p.Id, p => 0);
-
-            var allInBets = new List<int>();
-            foreach (var act in acts)
-            {
-                playersBets[act.Player] += act.Bet;
-                if (act.Play == Play.AllIn)
-                    allInBets.Add(playersBets[act.Player]);
-            }
-
-            if (!allInBets.Any())
-            {
-                var maxBet = playersBets.Max(p => p.Value);
-                yield return Pot.Create(
-                    playersBets.Where(p => p.Value == maxBet).Select(p => Players[p.Key]),
-                    acts.Sum(a => a.Bet));
-                yield break;
-            }
-
-            allInBets.Sort();
-            var players = TakeContributors(playersBets).ToArray();
-
-            var contribution = 0;
-            foreach (var bet in allInBets)
-            {
-                var contenders = new HashSet<Player>();
-                var amount = 0;
-                contribution = bet - contribution;
-
-                foreach (var player in players)
-                {
-                    if (playersBets[player.Id] >= contribution)
-                    {
-                        contenders.Add(player);
-                        playersBets[player.Id] -= contribution;
-                        amount += contribution;
-                    }
-                    else
-                    {
-                        amount += playersBets[player.Id];
-                        playersBets[player.Id] = 0;
-                    }
-                }
-
-                var pot = new Pot(amount, contenders);
-                yield return pot;
-            }
-
-            yield return Pot.Create(
-                TakeContributors(playersBets),
-                playersBets.Sum(b => b.Value)
-            );
-        }
 
         public static Game StartNew(BettingRules rules, Player[] players, Deck deck)
         {
@@ -148,7 +87,7 @@ namespace PokyPoker.Domain
             return new Game(Rules, players, Table, rounds);
         }
 
-        public ImmutableArray<Player> KeepActive(IList<Player> players, IEnumerable<int> active)
+        private ImmutableArray<Player> KeepActive(IList<Player> players, IEnumerable<int> active)
         {
             var activePlayers = new HashSet<int>(active);
             var result = new Player[players.Count];
@@ -230,7 +169,7 @@ namespace PokyPoker.Domain
             return options.ToArray();
         }
 
-        public Player[] GetWinners(IEnumerable<Player> players)
+        private Player[] GetWinners(IEnumerable<Player> players)
         {
             var winners = new List<Player>();
             foreach (var player in players.Select(p => p.WithHand(h => h.Combine(Table))))
@@ -258,6 +197,67 @@ namespace PokyPoker.Domain
                 .ToArray();
         }
 
+        private IEnumerable<Player> TakeContributors(IDictionary<int, int> bets) => bets
+            .Where(b => b.Value > 0)
+            .Select(b => Players[b.Key]);
+
+        private IEnumerable<Pot> SplitPot()
+        {
+            var acts = Rounds.SelectMany(r => r.Acts).ToArray();
+            var playersBets = Players.ToDictionary(p => (int) p.Id, p => 0);
+
+            var allInBets = new List<int>();
+            foreach (var act in acts)
+            {
+                playersBets[act.Player] += act.Bet;
+                if (act.Play == Play.AllIn)
+                    allInBets.Add(playersBets[act.Player]);
+            }
+
+            if (!allInBets.Any())
+            {
+                var maxBet = playersBets.Max(p => p.Value);
+                yield return Pot.Create(
+                    playersBets.Where(p => p.Value == maxBet).Select(p => Players[p.Key]),
+                    acts.Sum(a => a.Bet));
+                yield break;
+            }
+
+            allInBets.Sort();
+            var players = TakeContributors(playersBets).ToArray();
+
+            var contribution = 0;
+            foreach (var bet in allInBets)
+            {
+                var contenders = new HashSet<Player>();
+                var amount = 0;
+                contribution = bet - contribution;
+
+                foreach (var player in players)
+                {
+                    if (playersBets[player.Id] >= contribution)
+                    {
+                        contenders.Add(player);
+                        playersBets[player.Id] -= contribution;
+                        amount += contribution;
+                    }
+                    else
+                    {
+                        amount += playersBets[player.Id];
+                        playersBets[player.Id] = 0;
+                    }
+                }
+
+                var pot = new Pot(amount, contenders);
+                yield return pot;
+            }
+
+            yield return Pot.Create(
+                TakeContributors(playersBets),
+                playersBets.Sum(b => b.Value)
+            );
+        }
+
         public Player[] GetResult()
         {
             var pots = SplitPot();
@@ -281,18 +281,19 @@ namespace PokyPoker.Domain
             return result.ToArray();
         }
 
-        public Card[] GetCurrentTable()
+
+        private static Card[] CropTable(IEnumerable<Card> table, Stage stage)
         {
-            switch (Stage)
+            switch (stage)
             {
                 case Stage.PreFlop:
                     return new Card[0];
                 case Stage.Flop:
-                    return Table.Take(3).ToArray();
+                    return table.Take(3).ToArray();
                 case Stage.Turn:
-                    return Table.Take(4).ToArray();
+                    return table.Take(4).ToArray();
                 case Stage.River:
-                    return Table.Take(5).ToArray();
+                    return table.Take(5).ToArray();
                 default:
                     throw new ArgumentOutOfRangeException();
             }

@@ -1,4 +1,5 @@
 ﻿using System.Reactive.Disposables;
+using System.Windows;
 using ReactiveUI;
 
 namespace PokyPoker.Desktop
@@ -15,6 +16,13 @@ namespace PokyPoker.Desktop
             this.WhenActivated(cleanup =>
             {
                 this.OneWayBind(ViewModel, vm => vm.Table, v => v.TableTextBox.Text)
+                    .DisposeWith(cleanup);
+
+                this.OneWayBind(ViewModel, vm => vm.SidePots, v => v.SidePotsList.ItemsSource)
+                    .DisposeWith(cleanup);
+
+                this.OneWayBind(ViewModel, vm => vm.IsSidePotsVisible, v => v.SidePotsLabel.Visibility,
+                        sp => sp ? Visibility.Visible : Visibility.Collapsed)
                     .DisposeWith(cleanup);
 
                 this.OneWayBind(ViewModel, vm => vm.Pot, v => v.PotTextBox.Text, x => $"Pot : {x}")

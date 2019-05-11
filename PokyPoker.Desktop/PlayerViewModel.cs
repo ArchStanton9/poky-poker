@@ -22,7 +22,7 @@ namespace PokyPoker.Desktop
 
             Hand = new HandViewModel(
                 observableGame.Select(g => g.Players.First(p => p.Id == playerSpot).Hand),
-                observableGame.Select(g => g.GetCurrentTable())
+                observableGame.Select(g => g.CurrentTable)
             );
         }
 
