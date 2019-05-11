@@ -23,17 +23,23 @@ namespace PokyPoker.Desktop
 
             observableGame.Subscribe(game =>
             {
-                var round = game.CurrentRound;
-                Bet = round.MaxBet - round.PlayerBet(game.CurrentPlayer.Id);
-
                 optionsSource.Clear();
                 var opt = game.GetOptions();
                 if (opt.Any())
                     optionsSource.AddRange(opt);
             });
 
-            MakePlayCommand = ReactiveCommand
-                .Create<Play>(p => makePlayFunc(p, Bet));
+            observableGame.Select(GetSuggestedBet).Subscribe(b => Bet = b);
+
+            MakePlayCommand = ReactiveCommand.Create<Play>(p => makePlayFunc(p, Bet));
+        }
+
+        private static int GetSuggestedBet(Game game)
+        {
+            var round = game.CurrentRound;
+            var toCall = round.MaxBet - round.PlayerBet(game.CurrentPlayer.Id);
+
+            return Math.Min(toCall, game.CurrentPlayer.Stack);
         }
 
         [Reactive]
