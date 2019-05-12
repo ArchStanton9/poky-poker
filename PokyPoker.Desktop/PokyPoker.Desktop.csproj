@@ -39,6 +39,7 @@
     <Reference Include="System" />
     <Reference Include="System.Collections.Immutable, Version=1.2.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -57,10 +58,27 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="BetPlayView.xaml.cs">
+      <DependentUpon>BetPlayView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GameModel.cs" />
+    <Compile Include="PlayActions\BetViewModel.cs" />
+    <Compile Include="PlayActions\CallViewModel.cs" />
+    <Compile Include="PlayActions\IPlayViewModel.cs" />
+    <Compile Include="PlayActions\IPlayWithBet.cs" />
+    <Compile Include="PlayActions\PlayTemplateSelector.cs" />
+    <Compile Include="PlayActions\PlayViewModel.cs" />
+    <Compile Include="PlayView.xaml.cs">
+      <DependentUpon>PlayView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="TableView.xaml.cs">
       <DependentUpon>TableView.xaml</DependentUpon>
     </Compile>
     <Compile Include="TableViewModel.cs" />
+    <Page Include="BetPlayView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="HandView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -88,6 +106,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="PlayOptionsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PlayView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

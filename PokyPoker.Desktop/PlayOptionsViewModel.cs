@@ -1,53 +1,42 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reactive;
 using System.Reactive.Linq;
 using DynamicData;
+using PokyPoker.Desktop.PlayActions;
 using PokyPoker.Domain;
 using ReactiveUI;
-using ReactiveUI.Fody.Helpers;
 
 namespace PokyPoker.Desktop
 {
     public class PlayOptionsViewModel : ReactiveObject
     {
-        private readonly SourceList<Play> optionsSource = new SourceList<Play>();
-
-        public PlayOptionsViewModel(IObservable<Game> observableGame, Action<Play, int> makePlayFunc)
+        public PlayOptionsViewModel(GameModel gameModel)
         {
-            optionsSource.Connect()
-                .ObserveOn(RxApp.MainThreadScheduler)
+            var optionsSource = new IPlayViewModel[]
+            {
+                new BetViewModel(Play.Bet, gameModel),
+                new BetViewModel(Play.Raise, gameModel),
+                new CallViewModel(gameModel),
+                new PlayViewModel(Play.AllIn, gameModel),
+                new PlayViewModel(Play.Check, gameModel),
+                new PlayViewModel(Play.Fold, gameModel),
+            };
+
+            var filter = gameModel.ObservableGame.Select(game => VisiblePredicate(game.GetOptions()));
+            optionsSource.AsObservableChangeSet()
+                .Filter(filter)
                 .Bind(out options)
                 .Subscribe();
-
-            observableGame.Subscribe(game =>
-            {
-                optionsSource.Clear();
-                var opt = game.GetOptions();
-                if (opt.Any())
-                    optionsSource.AddRange(opt);
-            });
-
-            observableGame.Select(GetSuggestedBet).Subscribe(b => Bet = b);
-
-            MakePlayCommand = ReactiveCommand.Create<Play>(p => makePlayFunc(p, Bet));
         }
 
-        private static int GetSuggestedBet(Game game)
+        private static Func<IPlayViewModel, bool> VisiblePredicate(IEnumerable<Play> options)
         {
-            var round = game.CurrentRound;
-            var toCall = round.MaxBet - round.PlayerBet(game.CurrentPlayer.Id);
-
-            return Math.Min(toCall, game.CurrentPlayer.Stack);
+            return vm => options.Contains(vm.Play);
         }
 
-        [Reactive]
-        public int Bet { get; set; }
-
-        public ReadOnlyObservableCollection<Play> Options => options;
-        private readonly ReadOnlyObservableCollection<Play> options;
-
-        public ReactiveCommand<Play, Unit> MakePlayCommand { get; set; }
+        public ReadOnlyObservableCollection<IPlayViewModel> Options => options;
+        private readonly ReadOnlyObservableCollection<IPlayViewModel> options;
     }
 }

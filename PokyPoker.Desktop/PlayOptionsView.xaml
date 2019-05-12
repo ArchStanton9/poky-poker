@@ -7,19 +7,31 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:PokyPoker.Desktop"
     xmlns:reactiveUi="http://reactiveui.net"
+    xmlns:playActions="clr-namespace:PokyPoker.Desktop.PlayActions"
     mc:Ignorable="d"
     d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <playActions:PlayTemplateSelector x:Key="PlayTemplateSelector">
+
+                <playActions:PlayTemplateSelector.PlayTemplate>
+                    <DataTemplate>
+                        <local:PlayView ViewModel="{Binding}"/>
+                    </DataTemplate>
+                </playActions:PlayTemplateSelector.PlayTemplate>
+
+                <playActions:PlayTemplateSelector.PlayWithBetTemplate>
+                    <DataTemplate>
+                        <local:BetPlayView ViewModel="{Binding}"/>
+                    </DataTemplate>
+                </playActions:PlayTemplateSelector.PlayWithBetTemplate>
+
+            </playActions:PlayTemplateSelector>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
     <StackPanel>
-        <TextBox x:Name="BetTextBox" Margin="5 2" />
-        <ItemsControl x:Name="PlaysList">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Button Click="ButtonBase_OnClick"
-                            Margin="5 2"
-                            Content="{Binding}"
-                            CommandParameter="{Binding}" />
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        <ItemsControl x:Name="PlaysList" ItemTemplateSelector="{StaticResource PlayTemplateSelector}"/>
     </StackPanel>
 </reactiveUi:ReactiveUserControl>
