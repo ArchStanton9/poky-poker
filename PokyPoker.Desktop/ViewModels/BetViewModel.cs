@@ -1,9 +1,10 @@
 ﻿using System.Reactive;
+using PokyPoker.Desktop.Models;
 using PokyPoker.Domain;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
-namespace PokyPoker.Desktop.PlayActions
+namespace PokyPoker.Desktop.ViewModels
 {
     public class BetViewModel : IPlayWithBet
     {

@@ -1,10 +1,10 @@
-﻿using System;
-using System.Reactive;
+﻿using System.Reactive;
 using System.Reactive.Linq;
+using PokyPoker.Desktop.Models;
 using PokyPoker.Domain;
 using ReactiveUI;
 
-namespace PokyPoker.Desktop.PlayActions
+namespace PokyPoker.Desktop.ViewModels
 {
     public class CallViewModel : ReactiveObject, IPlayViewModel
     {

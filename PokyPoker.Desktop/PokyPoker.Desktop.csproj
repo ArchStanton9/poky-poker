@@ -35,6 +35,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>PokyPoker.Desktop.App</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Collections.Immutable, Version=1.2.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
@@ -58,28 +61,28 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="BetPlayView.xaml.cs">
+    <Compile Include="Views\BetPlayView.xaml.cs">
       <DependentUpon>BetPlayView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="GameModel.cs" />
-    <Compile Include="PlayActions\BetViewModel.cs" />
-    <Compile Include="PlayActions\CallViewModel.cs" />
-    <Compile Include="PlayActions\IPlayViewModel.cs" />
-    <Compile Include="PlayActions\IPlayWithBet.cs" />
-    <Compile Include="PlayActions\PlayTemplateSelector.cs" />
-    <Compile Include="PlayActions\PlayViewModel.cs" />
-    <Compile Include="PlayView.xaml.cs">
+    <Compile Include="Models\GameModel.cs" />
+    <Compile Include="ViewModels\BetViewModel.cs" />
+    <Compile Include="ViewModels\CallViewModel.cs" />
+    <Compile Include="ViewModels\IPlayViewModel.cs" />
+    <Compile Include="ViewModels\IPlayWithBet.cs" />
+    <Compile Include="Views\PlayTemplateSelector.cs" />
+    <Compile Include="ViewModels\PlayViewModel.cs" />
+    <Compile Include="Views\PlayView.xaml.cs">
       <DependentUpon>PlayView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="TableView.xaml.cs">
+    <Compile Include="Views\TableView.xaml.cs">
       <DependentUpon>TableView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="TableViewModel.cs" />
-    <Page Include="BetPlayView.xaml">
+    <Compile Include="ViewModels\TableViewModel.cs" />
+    <Page Include="Views\BetPlayView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="HandView.xaml">
+    <Page Include="Views\HandView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -92,41 +95,41 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="HandFormatter.cs" />
-    <Compile Include="HandView.xaml.cs">
+    <Compile Include="Views\HandView.xaml.cs">
       <DependentUpon>HandView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="HandViewModel.cs" />
-    <Compile Include="MainViewModel.cs" />
+    <Compile Include="ViewModels\HandViewModel.cs" />
+    <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="PlayerView.xaml">
+    <Page Include="Views\PlayerView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="PlayOptionsView.xaml">
+    <Page Include="Views\PlayOptionsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="PlayView.xaml">
+    <Page Include="Views\PlayView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="TableView.xaml">
+    <Page Include="Views\TableView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PlayerView.xaml.cs">
+    <Compile Include="Views\PlayerView.xaml.cs">
       <DependentUpon>PlayerView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="PlayerViewModel.cs" />
-    <Compile Include="PlayOptionsView.xaml.cs">
+    <Compile Include="ViewModels\PlayerViewModel.cs" />
+    <Compile Include="Views\PlayOptionsView.xaml.cs">
       <DependentUpon>PlayOptionsView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="PlayOptionsViewModel.cs" />
+    <Compile Include="ViewModels\PlayOptionsViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

@@ -1,5 +1,6 @@
 ﻿using System.Reactive.Disposables;
 using System.Windows;
+using PokyPoker.Desktop.ViewModels;
 using ReactiveUI;
 
 namespace PokyPoker.Desktop

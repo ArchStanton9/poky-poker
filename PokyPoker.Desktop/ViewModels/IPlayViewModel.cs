@@ -2,7 +2,7 @@
 using PokyPoker.Domain;
 using ReactiveUI;
 
-namespace PokyPoker.Desktop.PlayActions
+namespace PokyPoker.Desktop.ViewModels
 {
     public interface IPlayViewModel
     {

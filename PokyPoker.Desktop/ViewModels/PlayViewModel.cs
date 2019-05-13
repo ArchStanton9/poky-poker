@@ -1,8 +1,9 @@
 ﻿using System.Reactive;
+using PokyPoker.Desktop.Models;
 using PokyPoker.Domain;
 using ReactiveUI;
 
-namespace PokyPoker.Desktop.PlayActions
+namespace PokyPoker.Desktop.ViewModels
 {
     public class PlayViewModel : ReactiveObject, IPlayViewModel
     {

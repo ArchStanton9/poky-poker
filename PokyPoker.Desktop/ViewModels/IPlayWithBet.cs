@@ -1,4 +1,4 @@
-﻿namespace PokyPoker.Desktop.PlayActions
+﻿namespace PokyPoker.Desktop.ViewModels
 {
     public interface IPlayWithBet : IPlayViewModel
     {

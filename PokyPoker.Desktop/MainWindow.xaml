@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PokyPoker.Desktop"
+        xmlns:views="clr-namespace:PokyPoker.Desktop.Views"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid Margin="0 30">
@@ -22,7 +23,7 @@
             <ItemsControl x:Name="PlayersList" Grid.Column="0" >
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <local:PlayerView ViewModel="{Binding}" Margin="2" />
+                        <views:PlayerView ViewModel="{Binding}" Margin="2" />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
@@ -34,13 +35,13 @@
                 BorderBrush="DarkGray"
                 CornerRadius="2" >
 
-                <local:PlayOptionsView x:Name="PlayOptionsView" Margin="10 2"/>
+                <views:PlayOptionsView x:Name="PlayOptionsView" Margin="10 2"/>
 
             </Border>
         </Grid>
 
         <StackPanel Grid.Row="1" Margin="10 15" Width="400" HorizontalAlignment="Left">
-            <local:TableView Margin="5 2" x:Name="TableView"/>
+            <views:TableView Margin="5 2" x:Name="TableView"/>
         </StackPanel>
 
     </Grid>

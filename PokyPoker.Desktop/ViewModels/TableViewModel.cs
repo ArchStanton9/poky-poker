@@ -6,7 +6,7 @@ using DynamicData;
 using PokyPoker.Domain;
 using ReactiveUI;
 
-namespace PokyPoker.Desktop
+namespace PokyPoker.Desktop.ViewModels
 {
     public class TableViewModel : ReactiveObject
     {

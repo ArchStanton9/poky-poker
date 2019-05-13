@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using PokyPoker.Desktop.ViewModels;
 
-namespace PokyPoker.Desktop.PlayActions
+namespace PokyPoker.Desktop.Views
 {
     public class PlayTemplateSelector : DataTemplateSelector
     {

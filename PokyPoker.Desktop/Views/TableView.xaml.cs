@@ -1,8 +1,9 @@
 ﻿using System.Reactive.Disposables;
 using System.Windows;
+using PokyPoker.Desktop.ViewModels;
 using ReactiveUI;
 
-namespace PokyPoker.Desktop
+namespace PokyPoker.Desktop.Views
 {
     /// <summary>
     /// Interaction logic for TableView.xaml

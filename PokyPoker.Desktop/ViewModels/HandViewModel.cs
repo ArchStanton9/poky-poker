@@ -3,7 +3,7 @@ using System.Reactive.Linq;
 using PokyPoker.Domain;
 using ReactiveUI;
 
-namespace PokyPoker.Desktop
+namespace PokyPoker.Desktop.ViewModels
 {
     public class HandViewModel : ReactiveObject
     {

@@ -1,9 +1,10 @@
 ﻿using System.Collections.ObjectModel;
 using System.Linq;
+using PokyPoker.Desktop.Models;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
-namespace PokyPoker.Desktop
+namespace PokyPoker.Desktop.ViewModels
 {
     public class MainViewModel : ReactiveObject
     {

@@ -1,33 +1,34 @@
 ﻿<reactiveUi:ReactiveUserControl
-    x:TypeArguments="local:PlayOptionsViewModel"
-    x:Class="PokyPoker.Desktop.PlayOptionsView"
+    x:TypeArguments="viewModels:PlayOptionsViewModel"
+    x:Class="PokyPoker.Desktop.Views.PlayOptionsView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:PokyPoker.Desktop"
     xmlns:reactiveUi="http://reactiveui.net"
-    xmlns:playActions="clr-namespace:PokyPoker.Desktop.PlayActions"
+    xmlns:viewModels="clr-namespace:PokyPoker.Desktop.ViewModels"
+    xmlns:views="clr-namespace:PokyPoker.Desktop.Views"
     mc:Ignorable="d"
     d:DesignHeight="450" d:DesignWidth="800">
 
     <UserControl.Resources>
         <ResourceDictionary>
-            <playActions:PlayTemplateSelector x:Key="PlayTemplateSelector">
+            <views:PlayTemplateSelector x:Key="PlayTemplateSelector">
 
-                <playActions:PlayTemplateSelector.PlayTemplate>
+                <views:PlayTemplateSelector.PlayTemplate>
                     <DataTemplate>
-                        <local:PlayView ViewModel="{Binding}"/>
+                        <views:PlayView ViewModel="{Binding}"/>
                     </DataTemplate>
-                </playActions:PlayTemplateSelector.PlayTemplate>
+                </views:PlayTemplateSelector.PlayTemplate>
 
-                <playActions:PlayTemplateSelector.PlayWithBetTemplate>
+                <views:PlayTemplateSelector.PlayWithBetTemplate>
                     <DataTemplate>
-                        <local:BetPlayView ViewModel="{Binding}"/>
+                        <views:BetPlayView ViewModel="{Binding}"/>
                     </DataTemplate>
-                </playActions:PlayTemplateSelector.PlayWithBetTemplate>
+                </views:PlayTemplateSelector.PlayWithBetTemplate>
 
-            </playActions:PlayTemplateSelector>
+            </views:PlayTemplateSelector>
         </ResourceDictionary>
     </UserControl.Resources>
 

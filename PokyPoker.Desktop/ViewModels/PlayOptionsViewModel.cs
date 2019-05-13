@@ -4,11 +4,11 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
 using DynamicData;
-using PokyPoker.Desktop.PlayActions;
+using PokyPoker.Desktop.Models;
 using PokyPoker.Domain;
 using ReactiveUI;
 
-namespace PokyPoker.Desktop
+namespace PokyPoker.Desktop.ViewModels
 {
     public class PlayOptionsViewModel : ReactiveObject
     {

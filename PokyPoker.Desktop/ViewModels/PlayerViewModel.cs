@@ -5,7 +5,7 @@ using PokyPoker.Domain;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
-namespace PokyPoker.Desktop
+namespace PokyPoker.Desktop.ViewModels
 {
     public class PlayerViewModel : ReactiveObject
     {

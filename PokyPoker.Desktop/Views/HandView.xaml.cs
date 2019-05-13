@@ -1,7 +1,8 @@
 ﻿using System.Reactive.Disposables;
+using PokyPoker.Desktop.ViewModels;
 using ReactiveUI;
 
-namespace PokyPoker.Desktop
+namespace PokyPoker.Desktop.Views
 {
     /// <summary>
     /// Interaction logic for HandView.xaml
