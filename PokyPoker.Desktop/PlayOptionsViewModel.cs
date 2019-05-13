@@ -24,9 +24,11 @@ namespace PokyPoker.Desktop
                 new PlayViewModel(Play.Fold, gameModel),
             };
 
+            var comparer = Comparer<IPlayViewModel>.Create((l, r) => - l.Play.CompareTo(r.Play));
             var filter = gameModel.ObservableGame.Select(game => VisiblePredicate(game.GetOptions()));
             optionsSource.AsObservableChangeSet()
                 .Filter(filter)
+                .Sort(comparer)
                 .Bind(out options)
                 .Subscribe();
         }

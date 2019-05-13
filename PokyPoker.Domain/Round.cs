@@ -19,7 +19,6 @@ namespace PokyPoker.Domain
         }
 
         public IReadOnlyCollection<Act> Acts => acts;
-        public int Pot => Acts.Count == 0 ? 0 : Acts.Aggregate(0, (s, a) => s + a.Bet);
         public int MaxBet => GetMaxBet(acts);
         
         private static int GetMaxBet(IReadOnlyCollection<Act> acts) => acts.Count == 0
@@ -47,8 +46,6 @@ namespace PokyPoker.Domain
         public bool IsActive(int player) => LastPlay(acts, player) != Play.Fold && LastPlay(acts, player) != Play.AllIn;
 
         public IEnumerable<int> ActivePlayers => Players.Where(IsActive);
-
-        public bool HasWinner => ActivePlayers.Count() == 1;
 
         public static Round StartNew(int playersCount) =>
             new Round(new Act[0], playersCount);

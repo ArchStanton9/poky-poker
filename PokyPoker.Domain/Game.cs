@@ -54,8 +54,8 @@ namespace PokyPoker.Domain
 
             var acts = new[]
             {
-                new Act(0, Play.Blind, rules.SmallBlind),
-                new Act(1, Play.Blind, rules.BigBlind)
+                new Act(players[0].Id, Play.Blind, rules.SmallBlind),
+                new Act(players[1].Id, Play.Blind, rules.BigBlind)
             };
 
             var round = new Round(acts, players.Length);
@@ -130,6 +130,9 @@ namespace PokyPoker.Domain
             if (play == Play.Fold || play == Play.Check)
                 bet = 0;
 
+            if (play == Play.Raise && player.Stack == bet)
+                play = Play.AllIn;
+
             var act = new Act(player.Id, play, bet);
             var rounds = Rounds.Replace(CurrentRound, CurrentRound.MakeAct(act));
             var players = Players.Replace(player, player.WithStack(s => s - bet));
@@ -176,7 +179,7 @@ namespace PokyPoker.Domain
         private IEnumerable<Pot> SplitPot()
         {
             var acts = Rounds.SelectMany(r => r.Acts).ToArray();
-            var playersBets = Players.ToDictionary(p => (int) p.Id, p => 0);
+            var playersBets = Players.ToDictionary(p => p.Id, p => 0);
 
             var allInBets = new List<int>();
             foreach (var act in acts)
