@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.421
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.156
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PokyPoker.Domain", "PokyPoker.Domain\PokyPoker.Domain.csproj", "{BD48C112-051A-4734-B65E-E5F9A4A23D78}"
 EndProject
@@ -10,6 +10,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PokyPoker.Domain.Tests", "PokyPoker.Domain.Tests\PokyPoker.Domain.Tests.csproj", "{0408E0E2-FABC-4EA4-B501-5A17D8A1314A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokyPoker.Desktop", "PokyPoker.Desktop\PokyPoker.Desktop.csproj", "{988B2FFE-33AB-441A-BC2B-372ED523FE45}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokyPoker.WebApp", "PokyPoker.WebApp\PokyPoker.WebApp.csproj", "{01388595-A25D-40FB-820F-302DD7B0BE07}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokyPoker.Contracts", "PokyPoker.Contracts\PokyPoker.Contracts.csproj", "{B4820E97-64F5-43BF-8AF9-2D8181CF9D0A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +37,14 @@ Global
 		{988B2FFE-33AB-441A-BC2B-372ED523FE45}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{988B2FFE-33AB-441A-BC2B-372ED523FE45}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{988B2FFE-33AB-441A-BC2B-372ED523FE45}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01388595-A25D-40FB-820F-302DD7B0BE07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01388595-A25D-40FB-820F-302DD7B0BE07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01388595-A25D-40FB-820F-302DD7B0BE07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01388595-A25D-40FB-820F-302DD7B0BE07}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4820E97-64F5-43BF-8AF9-2D8181CF9D0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4820E97-64F5-43BF-8AF9-2D8181CF9D0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4820E97-64F5-43BF-8AF9-2D8181CF9D0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4820E97-64F5-43BF-8AF9-2D8181CF9D0A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

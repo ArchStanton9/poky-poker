@@ -19,6 +19,9 @@ namespace PokyPoker.Domain
         }
 
         public IReadOnlyCollection<Act> Acts => acts;
+
+        public int PlayersCount => playersCount;
+
         public int MaxBet => GetMaxBet(acts);
         
         private static int GetMaxBet(IReadOnlyCollection<Act> acts) => acts.Count == 0

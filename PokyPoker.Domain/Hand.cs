@@ -11,6 +11,7 @@ namespace PokyPoker.Domain
     {
         private readonly Card[] cards;
 
+
         public Hand(params Card[] cards)
         {
             if (cards.Length == 0)

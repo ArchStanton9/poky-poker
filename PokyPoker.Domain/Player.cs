@@ -4,11 +4,11 @@ namespace PokyPoker.Domain
 {
     public class Player
     {
-        public Player(int id, Hand hand, bool active, int stack)
+        public Player(int id, Hand hand, bool isActive, int stack)
         {
             Id = id;
             Hand = hand;
-            IsActive = active;
+            IsActive = isActive;
             Stack = stack;
         }
 
