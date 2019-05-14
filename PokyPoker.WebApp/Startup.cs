@@ -1,8 +1,12 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using PokyPoker.Domain;
+using PokyPoker.Service;
 
 namespace PokyPoker.WebApp
 {
@@ -20,6 +24,11 @@ namespace PokyPoker.WebApp
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddSignalR(opt => opt.EnableDetailedErrors = true);
+
+
+            services.AddSingleton<IRoomsRepository, RoomsRepository>();
+            services.AddSingleton<IGamesRepository, MemoryGameRepository>();
+            services.AddSingleton<IGameMapper, DtoMapper>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -29,6 +38,7 @@ namespace PokyPoker.WebApp
             {
                 app.UseDeveloperExceptionPage();
             }
+
 
             app.UseSignalR(routes => routes.MapHub<PokerGameHub>("/gameHub"));
             app.UseMvc();
