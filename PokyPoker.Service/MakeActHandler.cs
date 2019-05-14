@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using PokyPoker.Contracts.Messages;
 using PokyPoker.Domain;
 
 namespace PokyPoker.Service

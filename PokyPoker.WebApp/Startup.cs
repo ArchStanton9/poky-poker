@@ -19,6 +19,7 @@ namespace PokyPoker.WebApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddSignalR(opt => opt.EnableDetailedErrors = true);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -29,6 +30,7 @@ namespace PokyPoker.WebApp
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseSignalR(routes => routes.MapHub<PokerGameHub>("/gameHub"));
             app.UseMvc();
         }
     }

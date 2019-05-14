@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.DependencyInjection;
 using PokyPoker.Contracts;
+using PokyPoker.Contracts.Messages;
 using PokyPoker.Domain;
 using PokyPoker.Service;
 
@@ -74,8 +77,14 @@ namespace PokyPoker.WebApp.Controllers
 
             var handler = new MakeActHandler(repository);
             var game = await handler.Handle(command);
+            var dto = game.AsDto(mapper);
 
-            return game.AsDto(mapper);
+            var services = Request.HttpContext.RequestServices;
+            var context = services.GetRequiredService<IHubContext<PokerGameHub>>();
+            var publisher = new SignalRMessagePublisher(context);
+            await publisher.PublishAsync(new GameStateMessage {Game = dto});
+
+            return dto;
         }
 
         // DELETE api/values/5
