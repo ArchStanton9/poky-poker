@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using PokyPoker.Domain;
 using PokyPoker.Service;
+using PokyPoker.WebApp.Auth;
 
 namespace PokyPoker.WebApp
 {
@@ -24,7 +22,11 @@ namespace PokyPoker.WebApp
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddSignalR(opt => opt.EnableDetailedErrors = true);
-
+            services.AddAuthentication(opt =>
+            {
+                opt.DefaultAuthenticateScheme = "room.token";
+                opt.DefaultChallengeScheme = "room.token";
+            }).AddRoomTokenAuth(op => {});
 
             services.AddSingleton<IRoomsRepository, RoomsRepository>();
             services.AddSingleton<IGamesRepository, MemoryGameRepository>();
@@ -39,9 +41,10 @@ namespace PokyPoker.WebApp
                 app.UseDeveloperExceptionPage();
             }
 
-
+            app.UseAuthentication();
             app.UseSignalR(routes => routes.MapHub<PokerGameHub>("/gameHub"));
             app.UseMvc();
+
         }
     }
 }

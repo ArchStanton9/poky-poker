@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
-using PokyPoker.Domain;
 
 namespace PokyPoker.ConsoleApp
 {
@@ -9,6 +7,9 @@ namespace PokyPoker.ConsoleApp
     {
         static void Main(string[] args)
         {
+            var arr = Guid.NewGuid().ToByteArray().Concat(Guid.NewGuid().ToByteArray()).ToArray();
+
+            Console.Write(Convert.ToBase64String(arr));
             Console.ReadLine();
         }
     }
