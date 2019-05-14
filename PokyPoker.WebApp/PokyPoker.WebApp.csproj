@@ -9,7 +9,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="8.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
@@ -18,6 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\PokyPoker.Contracts\PokyPoker.Contracts.csproj" />
     <ProjectReference Include="..\PokyPoker.Domain\PokyPoker.Domain.csproj" />
+    <ProjectReference Include="..\PokyPoker.Service\PokyPoker.Service.csproj" />
   </ItemGroup>
 
 </Project>

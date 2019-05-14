@@ -4,11 +4,11 @@ using AutoMapper;
 using PokyPoker.Contracts;
 using PokyPoker.Domain;
 
-namespace PokyPoker.WebApp
+namespace PokyPoker.Service
 {
-    public class DtoMapper
+    public class DtoMapper : IGameMapper
     {
-        public DtoMapper()
+        static DtoMapper()
         {
             Mapper.Initialize(config =>
             {

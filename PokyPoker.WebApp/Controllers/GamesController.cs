@@ -1,9 +1,11 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using PokyPoker.Contracts;
 using PokyPoker.Domain;
+using PokyPoker.Service;
 
 namespace PokyPoker.WebApp.Controllers
 {
@@ -30,29 +32,26 @@ namespace PokyPoker.WebApp.Controllers
 
             var game = Game.StartNew(rules, players, table);
 
-            Games.GetOrAdd("42", mapper.Map(game));
+            repository.SetGameAsync(Guid.Parse("5a827b17-87d9-4226-9af6-bf567e99b0f1"), game);
         }
 
+        private static readonly MemoryGameRepository repository = new MemoryGameRepository();
         private static readonly DtoMapper mapper = new DtoMapper();
 
-        private static readonly ConcurrentDictionary<string, GameDto> Games =
-            new ConcurrentDictionary<string, GameDto>();
 
         // GET api/values
         [HttpGet]
         public ActionResult<IEnumerable<string>> Get()
         {
-            return Games.Keys.ToArray();
+            return repository.GameIds.Select(id => id.ToString()).ToArray();
         }
 
         // GET api/values/5
         [HttpGet("{id}")]
-        public ActionResult<GameDto> Get(string id)
+        public async Task<ActionResult<GameDto>> Get(Guid id)
         {
-            if (Games.TryGetValue(id, out var dto))
-                return Ok(dto);
-
-            return NotFound();
+            var game = await repository.GetGameAsync(id);
+            return game.AsDto(mapper);
         }
 
         // POST api/values
@@ -63,33 +62,20 @@ namespace PokyPoker.WebApp.Controllers
 
         // PUT api/values/5
         [HttpPut("{id}")]
-        public ActionResult<GameDto> Put(string id, [FromBody] ActDto act)
+        public async Task<ActionResult<GameDto>> Put(Guid id, [FromBody] ActDto act)
         {
-            if (!Games.TryGetValue(id, out var value))
-                return NotFound();
-
-            var game = mapper.Map(value);
-            game = game.MakeAct((Play) act.Play, act.Bet);
-
-            if (game.IsComplete)
+            var command = new MakeActCommand
             {
-                var result = game.GetResult();
-                var players = new Queue<Player>(result);
-                var player = players.Dequeue();
-                players.Enqueue(player);
+                GameId = id,
+                Player = act.Player,
+                Play = (Play) act.Play,
+                Bet = act.Bet,
+            };
 
-                game = Game.StartNew(BettingRules.Standard, players.ToArray(), Deck.BuildStandard());
-            }
+            var handler = new MakeActHandler(repository);
+            var game = await handler.Handle(command);
 
-            if (game.CurrentRound.IsComplete)
-            {
-                game = game.NextRound();
-            }
-
-            var dto = mapper.Map(game);
-            Games[id] = dto;
-
-            return Ok(dto);
+            return game.AsDto(mapper);
         }
 
         // DELETE api/values/5
