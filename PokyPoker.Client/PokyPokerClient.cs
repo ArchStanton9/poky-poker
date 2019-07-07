@@ -12,7 +12,7 @@ using Vostok.Logging.Abstractions;
 
 namespace PokyPoker.Client
 {
-    public class PokyPokerClient
+    public class PokyPokerClient : IPokerClient
     {
         private readonly Uri url;
         private readonly ILog log = new SilentLog();
