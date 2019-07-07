@@ -1,0 +1,47 @@
+﻿<Window x:Class="PokyPoker.Desktop.TestApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PokyPoker.Desktop.TestApp"
+        xmlns:views="clr-namespace:PokyPoker.Desktop.TestApp.Views"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid Margin="0 30">
+        <Grid.RowDefinitions>
+            <RowDefinition MinHeight="150" Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300"/>
+                <ColumnDefinition Width="200"/>
+            </Grid.ColumnDefinitions>
+
+            <ItemsControl x:Name="PlayersList" Grid.Column="0" >
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <views:PlayerView ViewModel="{Binding}" Margin="2" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <Border 
+                Grid.Column="1"
+                Margin="10 2"
+                BorderThickness="1"
+                BorderBrush="DarkGray"
+                CornerRadius="2" >
+
+                <views:PlayOptionsView x:Name="PlayOptionsView" Margin="10 2"/>
+
+            </Border>
+        </Grid>
+
+        <StackPanel Grid.Row="1" Margin="10 15" Width="400" HorizontalAlignment="Left">
+            <views:TableView Margin="5 2" x:Name="TableView"/>
+        </StackPanel>
+
+    </Grid>
+</Window>
