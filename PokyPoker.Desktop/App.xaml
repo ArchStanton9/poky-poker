@@ -4,6 +4,14 @@
              xmlns:local="clr-namespace:PokyPoker.Desktop"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+         <ResourceDictionary>
+             <!--<ResourceDictionary.MergedDictionaries>
+                 <ResourceDictionary Source="Themes/Generic.xaml"/>
+             </ResourceDictionary.MergedDictionaries>-->
+
+             <BitmapImage x:Key="CardsFrontMap" UriSource="Assets/cards.png"/>
+             <BitmapImage x:Key="TableImage" UriSource="Assets/table.png"/>
+
+         </ResourceDictionary>
     </Application.Resources>
 </Application>

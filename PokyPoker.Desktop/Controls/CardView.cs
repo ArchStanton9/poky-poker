@@ -52,7 +52,16 @@ namespace PokyPoker.Desktop.Controls
 
 
         public static readonly DependencyProperty CardsSourceProperty = DependencyProperty.Register(
-            "CardsSource", typeof(BitmapSource), typeof(CardView), new PropertyMetadata(default(BitmapSource)));
+            "CardsSource", typeof(BitmapSource), typeof(CardView),
+            new PropertyMetadata(default(BitmapSource), OnCardSourcePropertyChangedCallback));
+
+        private static void OnCardSourcePropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is CardView cardView)
+            {
+                cardView.OnCardChanged(cardView.Card);
+            }
+        }
 
         public BitmapSource CardsSource
         {
@@ -62,6 +71,9 @@ namespace PokyPoker.Desktop.Controls
 
         private void OnCardChanged(Card card)
         {
+            if (CardsSource == null)
+                return;
+
             var key = (int) card.Suit << 8 + (int) card.Rank;
             if (!cardsFrontSources.TryGetValue(key, out var source))
             {

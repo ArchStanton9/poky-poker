@@ -5,14 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PokyPoker.Desktop"
         xmlns:controls="clr-namespace:PokyPoker.Desktop.Controls"
+        xmlns:views="clr-namespace:PokyPoker.Desktop.Views"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="600" Width="780">
     <Grid>
-        <StackPanel Orientation="Horizontal">
-            <controls:CardView Width="40" Height="90" x:Name="Card1" Margin="5"/>
-            <controls:CardView Width="40" Height="90" x:Name="Card2" Margin="5"/>
-            <controls:CardView Width="40" Height="90" x:Name="Card3" Margin="5"/>
-        </StackPanel>
-        
+        <Image Source="{StaticResource TableImage}"/>
+        <views:BoardView x:Name="BoardView"/>
     </Grid>
 </Window>
