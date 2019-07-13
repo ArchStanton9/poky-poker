@@ -18,8 +18,8 @@
     </Control.Resources>
 
     <Grid>
-        <Border BorderThickness="2" BorderBrush="Gray" HorizontalAlignment="Right" Margin="20" CornerRadius="2">
-            <StackPanel Orientation="Vertical" Margin="10" HorizontalAlignment="Right">
+        <Border BorderThickness="2" BorderBrush="Gray" Margin="20" CornerRadius="2">
+            <StackPanel Orientation="Vertical" Margin="10">
                 <StackPanel Orientation="Horizontal">
                     <Button x:Name="BetButton" Content="Bet" Style="{StaticResource PlayButtonStyle}" />
                     <Button x:Name="RaiseButton" Content="Raise" Style="{StaticResource PlayButtonStyle}" />

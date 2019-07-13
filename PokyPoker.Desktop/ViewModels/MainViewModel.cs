@@ -48,6 +48,7 @@ namespace PokyPoker.Desktop.ViewModels
             };
 
             PlayOptionsViewModel = new PlayOptionsViewModel();
+            ChatViewModel = new ChatViewModel();
         }
 
         public BoardViewModel BoardViewModel { get; set; } = new BoardViewModel();
@@ -61,5 +62,7 @@ namespace PokyPoker.Desktop.ViewModels
         public PlayerViewModel Player4 { get; set; }
 
         public PlayOptionsViewModel PlayOptionsViewModel { get; set; }
+
+        public ChatViewModel ChatViewModel { get; set; }
     }
 }

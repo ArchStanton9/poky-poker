@@ -33,6 +33,9 @@ namespace PokyPoker.Desktop
                 this.OneWayBind(ViewModel, vm => vm.PlayOptionsViewModel,
                         v => v.PlayOptionsView.ViewModel)
                     .DisposeWith(cleanUp);
+
+                this.OneWayBind(ViewModel, vm => vm.ChatViewModel, v => v.ChatView.ViewModel)
+                    .DisposeWith(cleanUp);
             });
 
             ViewModel = new MainViewModel();
