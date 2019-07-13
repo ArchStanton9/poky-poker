@@ -5,10 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="clr-namespace:PokyPoker.Desktop.Views"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="780">
+        Title="MainWindow" Height="720" Width="750">
     <Grid>
-        <Image Source="{StaticResource TableImage}" />
-        <Canvas x:Name="TableCanvas">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Image Grid.Row="0" Source="{StaticResource TableImage}" />
+        <Canvas Grid.Row="0" x:Name="TableCanvas">
             <Grid Width="{Binding ActualWidth, ElementName=TableCanvas}"
                   Height="{Binding ActualHeight, ElementName=TableCanvas}">
                 <views:BoardView x:Name="BoardView"
@@ -30,6 +34,7 @@
                               Canvas.Right="50"/>
         </Canvas>
 
+        <views:PlayOptionsView x:Name="PlayOptionsView" Grid.Row="1"/>
 
     </Grid>
 </Window>

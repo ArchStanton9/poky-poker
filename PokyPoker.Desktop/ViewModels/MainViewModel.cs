@@ -46,6 +46,8 @@ namespace PokyPoker.Desktop.ViewModels
                 LeftCard = new Card(Rank.King, Suit.Diamonds),
                 RightCard = new Card(Rank.King, Suit.Clubs)
             };
+
+            PlayOptionsViewModel = new PlayOptionsViewModel();
         }
 
         public BoardViewModel BoardViewModel { get; set; } = new BoardViewModel();
@@ -57,5 +59,7 @@ namespace PokyPoker.Desktop.ViewModels
         public PlayerViewModel Player3 { get; set; }
 
         public PlayerViewModel Player4 { get; set; }
+
+        public PlayOptionsViewModel PlayOptionsViewModel { get; set; }
     }
 }

@@ -62,11 +62,15 @@
     <Compile Include="ViewModels\BoardViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\PlayerViewModel.cs" />
+    <Compile Include="ViewModels\PlayOptionsViewModel.cs" />
     <Compile Include="Views\BoardView.xaml.cs">
       <DependentUpon>BoardView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\PlayerView.xaml.cs">
       <DependentUpon>PlayerView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PlayOptionsView.xaml.cs">
+      <DependentUpon>PlayOptionsView.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -133,6 +137,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\PlayerView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\PlayOptionsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
