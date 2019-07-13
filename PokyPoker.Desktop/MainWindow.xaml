@@ -16,9 +16,18 @@
                                  HorizontalAlignment="Center"/>
             </Grid>
 
-            <views:PlayerView x:Name="PlayerView"
+            <views:PlayerView x:Name="Player1View"
                               Canvas.Top="70"
                               Canvas.Left="50"/>
+            <views:PlayerView x:Name="Player2View"
+                              Canvas.Bottom="70"
+                              Canvas.Left="50"/>
+            <views:PlayerView x:Name="Player3View"
+                              Canvas.Top="70"
+                              Canvas.Right="50"/>
+            <views:PlayerView x:Name="Player4View"
+                              Canvas.Bottom="70"
+                              Canvas.Right="50"/>
         </Canvas>
 
 

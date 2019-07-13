@@ -7,12 +7,7 @@ namespace PokyPoker.Desktop.ViewModels
     {
         public PlayerViewModel()
         {
-            Name = "Johnny \"The Fox\"";
-            Currency = 400;
-            LastPlay = Play.Call;
-            PhotoUrl = "Assets/Avatar1.png";
-            LeftCard = new Card(Rank.Ace, Suit.Spades);
-            RightCard = new Card(Rank.Queen, Suit.Hearts);
+            
         }
 
 

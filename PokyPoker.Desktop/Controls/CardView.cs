@@ -71,7 +71,7 @@ namespace PokyPoker.Desktop.Controls
 
         private void OnCardChanged(Card card)
         {
-            if (CardsSource == null)
+            if (CardsSource == null || card.Rank == 0)
                 return;
 
             var key = (int) card.Suit << 8 + (int) card.Rank;

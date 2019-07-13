@@ -22,6 +22,12 @@ namespace PokyPoker.Desktop.Views
 
                 this.OneWayBind(ViewModel, vm => vm.PhotoUrl, v => v.PlayerImage.Source)
                     .DisposeWith(cleanUp);
+
+                this.OneWayBind(ViewModel, vm => vm.LeftCard, v => v.LeftCardView.Card)
+                    .DisposeWith(cleanUp);
+
+                this.OneWayBind(ViewModel, vm => vm.RightCard, v => v.RightCardView.Card)
+                    .DisposeWith(cleanUp);
             });
         }
     }
