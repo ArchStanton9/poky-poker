@@ -13,10 +13,13 @@ namespace PokyPoker.Desktop
         public MainWindow()
         {
             InitializeComponent();
-            this.WhenActivated(c =>
+            this.WhenActivated(cleanUp =>
             {
                 this.OneWayBind(ViewModel, vm => vm.BoardViewModel, v => v.BoardView.ViewModel)
-                    .DisposeWith(c);
+                    .DisposeWith(cleanUp);
+
+                this.OneWayBind(ViewModel, vm => vm.Player, v => v.PlayerView.ViewModel)
+                    .DisposeWith(cleanUp);
             });
 
             ViewModel = new MainViewModel();

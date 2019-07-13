@@ -3,13 +3,24 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:PokyPoker.Desktop"
-        xmlns:controls="clr-namespace:PokyPoker.Desktop.Controls"
         xmlns:views="clr-namespace:PokyPoker.Desktop.Views"
         mc:Ignorable="d"
         Title="MainWindow" Height="600" Width="780">
     <Grid>
-        <Image Source="{StaticResource TableImage}"/>
-        <views:BoardView x:Name="BoardView"/>
+        <Image Source="{StaticResource TableImage}" />
+        <Canvas x:Name="TableCanvas">
+            <Grid Width="{Binding ActualWidth, ElementName=TableCanvas}"
+                  Height="{Binding ActualHeight, ElementName=TableCanvas}">
+                <views:BoardView x:Name="BoardView"
+                                 VerticalAlignment="Center"
+                                 HorizontalAlignment="Center"/>
+            </Grid>
+
+            <views:PlayerView x:Name="PlayerView"
+                              Canvas.Top="70"
+                              Canvas.Left="50"/>
+        </Canvas>
+
+
     </Grid>
 </Window>
