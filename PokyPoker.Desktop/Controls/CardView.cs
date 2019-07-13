@@ -74,7 +74,7 @@ namespace PokyPoker.Desktop.Controls
             if (CardsSource == null || card.Rank == 0)
                 return;
 
-            var key = (int) card.Suit << 8 + (int) card.Rank;
+            var key = (int) card.Suit * 100 + (int) card.Rank;
             if (!cardsFrontSources.TryGetValue(key, out var source))
             {
                 var rect = GetCardRect(card);

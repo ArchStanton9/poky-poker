@@ -11,7 +11,7 @@ namespace PokyPoker.Desktop.ViewModels
         {
             new Card(Rank.Ace, Suit.Spades),
             new Card(Rank.Queen, Suit.Hearts),
-            new Card(Rank.Ten, Suit.Diamonds)
+            new Card(Rank.King, Suit.Hearts)
         };
     }
 }
