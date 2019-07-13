@@ -1,4 +1,5 @@
 ﻿using System.Reactive.Disposables;
+using System.Windows.Media;
 using PokyPoker.Desktop.ViewModels;
 using ReactiveUI;
 
@@ -28,6 +29,11 @@ namespace PokyPoker.Desktop.Views
 
                 this.OneWayBind(ViewModel, vm => vm.RightCard, v => v.RightCardView.Card)
                     .DisposeWith(cleanUp);
+
+                this.OneWayBind(ViewModel,
+                    vm => vm.ShouldAct,
+                    v => v.PlayerBorder.BorderBrush,
+                    x => x ? Brushes.DodgerBlue : Brushes.DarkGray);
             });
         }
     }

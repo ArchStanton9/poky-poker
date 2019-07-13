@@ -1,4 +1,4 @@
-﻿using PokyPoker.Domain;
+﻿using PokyPoker.Desktop.Model;
 using ReactiveUI;
 
 namespace PokyPoker.Desktop.ViewModels
@@ -7,51 +7,38 @@ namespace PokyPoker.Desktop.ViewModels
     {
         public MainViewModel()
         {
-            Player1 = new PlayerViewModel()
+            var gameModel = new GameModel();
+
+            Player1 = new PlayerViewModel(0, gameModel.ObservableGame)
             {
                 Name = "Johnny \"The Fox\"",
-                Currency = 400,
-                LastPlay = Play.Call,
-                PhotoUrl = "Assets/Avatar1.png",
-                LeftCard = new Card(Rank.Ace, Suit.Spades),
-                RightCard = new Card(Rank.Queen, Suit.Hearts)
+                PhotoUrl = "Assets/Avatar1.png"
             };
 
-            Player2 = new PlayerViewModel()
+            Player2 = new PlayerViewModel(1, gameModel.ObservableGame)
             {
                 Name = "Poker Queen",
-                Currency = 500,
-                LastPlay = Play.Call,
-                PhotoUrl = "Assets/Avatar2.png",
-                LeftCard = new Card(Rank.Jack, Suit.Clubs),
-                RightCard = new Card(Rank.Jack, Suit.Diamonds)
+                PhotoUrl = "Assets/Avatar2.png"
             };
 
-            Player3 = new PlayerViewModel()
+            Player3 = new PlayerViewModel(2, gameModel.ObservableGame)
             {
                 Name = "Gambler #3",
-                Currency = 600,
-                LastPlay = Play.Call,
                 PhotoUrl = "Assets/Avatar3.png",
-                LeftCard = new Card(Rank.Five, Suit.Diamonds),
-                RightCard = new Card(Rank.Seven, Suit.Clubs)
             };
 
-            Player4 = new PlayerViewModel()
+            Player4 = new PlayerViewModel(3, gameModel.ObservableGame)
             {
                 Name = "Gandalf the grey",
-                Currency = 1000,
-                LastPlay = Play.Call,
                 PhotoUrl = "Assets/Avatar4.png",
-                LeftCard = new Card(Rank.King, Suit.Diamonds),
-                RightCard = new Card(Rank.King, Suit.Clubs)
             };
 
-            PlayOptionsViewModel = new PlayOptionsViewModel();
+            PlayOptionsViewModel = new PlayOptionsViewModel(gameModel);
             ChatViewModel = new ChatViewModel();
+            BoardViewModel = new BoardViewModel(gameModel.ObservableGame);
         }
 
-        public BoardViewModel BoardViewModel { get; set; } = new BoardViewModel();
+        public BoardViewModel BoardViewModel { get; set; }
 
         public PlayerViewModel Player1 { get; set; }
 

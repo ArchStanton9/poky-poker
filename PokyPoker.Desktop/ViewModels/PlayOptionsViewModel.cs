@@ -1,4 +1,7 @@
-﻿using System.Reactive;
+﻿using System.Collections.Generic;
+using System.Reactive;
+using System.Reactive.Linq;
+using PokyPoker.Desktop.Model;
 using PokyPoker.Domain;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -7,18 +10,54 @@ namespace PokyPoker.Desktop.ViewModels
 {
     public class PlayOptionsViewModel : ReactiveObject
     {
-        public PlayOptionsViewModel()
+        public PlayOptionsViewModel(GameModel model)
         {
-            MakePlayCommand = ReactiveCommand.Create<Play>(p =>
-            {
+            MakePlayCommand = ReactiveCommand.Create<Play>(p => model.MakeAct(p, Bet));
 
-            });
-            CanFold = true;
-            CanCall = true;
-            CanRaise = true;
-            Bet = 100;
-            MinBet = 100;
-            MaxBet = 500;
+            model.ObservableGame
+                .Select(GetMinBet)
+                .ToProperty(this, vm => vm.MinBet, out minBet);
+
+            model.ObservableGame
+                .Select(g => g.CurrentPlayer.Stack)
+                .ToProperty(this, vm => vm.MaxBet, out maxBet);
+
+            var options = model.ObservableGame
+                .Select(g => new HashSet<Play>(g.GetOptions()));
+
+            options
+                .Select(o => o.Contains(Play.Bet))
+                .ToProperty(this, vm => vm.CanBet, out canBet);
+
+            options
+                .Select(o => o.Contains(Play.Raise))
+                .ToProperty(this, vm => vm.CanRaise, out canRaise);
+
+            options
+                .Select(o => o.Contains(Play.AllIn))
+                .ToProperty(this, vm => vm.CanAllIn, out canAllIn);
+
+            options
+                .Select(o => o.Contains(Play.Call))
+                .ToProperty(this, vm => vm.CanCall, out canCall);
+
+            options
+                .Select(o => o.Contains(Play.Check))
+                .ToProperty(this, vm => vm.CanCheck, out canCheck);
+
+            options
+                .Select(o => o.Contains(Play.Fold))
+                .ToProperty(this, vm => vm.CanFold, out canFold);
+        }
+
+        private static int GetMinBet(Game game)
+        {
+            var maxBet = game.CurrentRound.MaxBet;
+            if (maxBet == 0)
+                return game.Rules.BigBlind;
+
+            var playerBet = game.GetPlayerState(game.CurrentPlayer.Id).Bet;
+            return maxBet - playerBet;
         }
 
         public ReactiveCommand<Play, Unit> MakePlayCommand;
@@ -26,28 +65,28 @@ namespace PokyPoker.Desktop.ViewModels
         [Reactive]
         public int Bet { get; set; }
 
-        [Reactive]
-        public int MinBet { get; set; }
+        private readonly ObservableAsPropertyHelper<int> minBet;
+        public int MinBet => minBet.Value;
 
-        [Reactive]
-        public int MaxBet { get; set; }
+        private readonly ObservableAsPropertyHelper<int> maxBet;
+        public int MaxBet => maxBet.Value;
 
-        [Reactive]
-        public bool CanBet { get; set; }
+        private readonly ObservableAsPropertyHelper<bool> canBet;
+        public bool CanBet => canBet.Value;
 
-        [Reactive]
-        public bool CanRaise { get; set; }
+        private readonly ObservableAsPropertyHelper<bool> canRaise;
+        public bool CanRaise => canRaise.Value;
 
-        [Reactive]
-        public bool CanCall { get; set; }
+        private readonly ObservableAsPropertyHelper<bool> canCall;
+        public bool CanCall => canCall.Value;
 
-        [Reactive]
-        public bool CanAllIn { get; set; }
+        private readonly ObservableAsPropertyHelper<bool> canAllIn;
+        public bool CanAllIn => canAllIn.Value;
 
-        [Reactive]
-        public bool CanCheck { get; set; }
+        private readonly ObservableAsPropertyHelper<bool> canCheck;
+        public bool CanCheck => canCheck.Value;
 
-        [Reactive]
-        public bool CanFold { get; set; }
+        private readonly ObservableAsPropertyHelper<bool> canFold;
+        public bool CanFold => canFold.Value;
     }
 }

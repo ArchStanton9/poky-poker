@@ -16,7 +16,7 @@
             <controls:CardView x:Name="RightCardView" Margin="-20 0 0 0"/>
         </StackPanel>
 
-        <Border BorderBrush="Gray" Margin="0 40 0 0" BorderThickness="3" CornerRadius="4">
+        <Border x:Name="PlayerBorder" BorderBrush="Gray" Margin="0 40 0 0" BorderThickness="3" CornerRadius="4">
             <Grid Background="Azure">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
