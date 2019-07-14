@@ -18,16 +18,7 @@ namespace PokyPoker.Desktop
                 this.OneWayBind(ViewModel, vm => vm.BoardViewModel, v => v.BoardView.ViewModel)
                     .DisposeWith(cleanUp);
 
-                this.OneWayBind(ViewModel, vm => vm.Player1, v => v.Player1View.ViewModel)
-                    .DisposeWith(cleanUp);
-
-                this.OneWayBind(ViewModel, vm => vm.Player2, v => v.Player2View.ViewModel)
-                    .DisposeWith(cleanUp);
-
-                this.OneWayBind(ViewModel, vm => vm.Player3, v => v.Player3View.ViewModel)
-                    .DisposeWith(cleanUp);
-
-                this.OneWayBind(ViewModel, vm => vm.Player4, v => v.Player4View.ViewModel)
+                this.OneWayBind(ViewModel, vm => vm.Spots, v => v.SpotsList.ItemsSource)
                     .DisposeWith(cleanUp);
 
                 this.OneWayBind(ViewModel, vm => vm.PlayOptionsViewModel,

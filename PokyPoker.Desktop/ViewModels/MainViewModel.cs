@@ -1,4 +1,10 @@
-﻿using PokyPoker.Desktop.Model;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Reactive.Linq;
+using DynamicData;
+using DynamicData.Binding;
+using PokyPoker.Desktop.Model;
 using ReactiveUI;
 
 namespace PokyPoker.Desktop.ViewModels
@@ -8,45 +14,29 @@ namespace PokyPoker.Desktop.ViewModels
         public MainViewModel()
         {
             var gameModel = new GameModel();
+            
+            Spots = new ObservableCollection<SpotViewModel>();
 
-            Player1 = new PlayerViewModel(0, gameModel.ObservableGame)
-            {
-                Name = "Johnny \"The Fox\"",
-                PhotoUrl = "Assets/Avatar1.png"
-            };
+            var playersSource = gameModel.Players
+                .Transform(p => new PlayerViewModel(p, gameModel.ObservableGame))
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Bind(out players)
+                .Subscribe();
 
-            Player2 = new PlayerViewModel(1, gameModel.ObservableGame)
-            {
-                Name = "Poker Queen",
-                PhotoUrl = "Assets/Avatar2.png"
-            };
+            Spots.AddRange(Enumerable.Range(0, 8).Select(i => new SpotViewModel(i, Players)));
 
-            Player3 = new PlayerViewModel(2, gameModel.ObservableGame)
-            {
-                Name = "Gambler #3",
-                PhotoUrl = "Assets/Avatar3.png",
-            };
-
-            Player4 = new PlayerViewModel(3, gameModel.ObservableGame)
-            {
-                Name = "Gandalf the grey",
-                PhotoUrl = "Assets/Avatar4.png",
-            };
 
             PlayOptionsViewModel = new PlayOptionsViewModel(gameModel);
             ChatViewModel = new ChatViewModel();
             BoardViewModel = new BoardViewModel(gameModel.ObservableGame);
         }
 
+        private readonly ReadOnlyObservableCollection<PlayerViewModel> players;
+        public ReadOnlyObservableCollection<PlayerViewModel> Players => players;
+
         public BoardViewModel BoardViewModel { get; set; }
 
-        public PlayerViewModel Player1 { get; set; }
-
-        public PlayerViewModel Player2 { get; set; }
-
-        public PlayerViewModel Player3 { get; set; }
-
-        public PlayerViewModel Player4 { get; set; }
+        public ObservableCollection<SpotViewModel> Spots { get; set; }
 
         public PlayOptionsViewModel PlayOptionsViewModel { get; set; }
 

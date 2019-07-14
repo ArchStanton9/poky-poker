@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="clr-namespace:PokyPoker.Desktop.Views"
+        xmlns:controls="clr-namespace:PokyPoker.Desktop.Controls"
         mc:Ignorable="d"
         Title="MainWindow" Height="720" Width="750">
     <Grid>
@@ -11,7 +12,9 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Image Grid.Row="0" Source="{StaticResource TableImage}" />
+        <Image Grid.Row="0" x:Name="TableImage"
+               Stretch="Fill"
+               Source="{StaticResource TableImage}" />
         <Canvas Grid.Row="0" x:Name="TableCanvas">
             <Grid Width="{Binding ActualWidth, ElementName=TableCanvas}"
                   Height="{Binding ActualHeight, ElementName=TableCanvas}">
@@ -20,18 +23,22 @@
                                  HorizontalAlignment="Center"/>
             </Grid>
 
-            <views:PlayerView x:Name="Player1View"
-                              Canvas.Top="70"
-                              Canvas.Left="50"/>
-            <views:PlayerView x:Name="Player2View"
-                              Canvas.Bottom="70"
-                              Canvas.Left="50"/>
-            <views:PlayerView x:Name="Player3View"
-                              Canvas.Top="70"
-                              Canvas.Right="50"/>
-            <views:PlayerView x:Name="Player4View"
-                              Canvas.Bottom="70"
-                              Canvas.Right="50"/>
+            <ItemsControl x:Name="SpotsList" 
+                          Width="{Binding ActualWidth, ElementName=TableCanvas}"
+                          Height="{Binding ActualHeight, ElementName=TableCanvas}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <controls:TableBorderPanel Flattening="0.85"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <views:SpotView ViewModel="{Binding}"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+
         </Canvas>
 
 

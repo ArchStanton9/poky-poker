@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reactive.Linq;
+using PokyPoker.Desktop.Model;
 using PokyPoker.Domain;
 using ReactiveUI;
 
@@ -8,12 +9,14 @@ namespace PokyPoker.Desktop.ViewModels
 {
     public class PlayerViewModel : ReactiveObject
     {
-        private readonly int id;
+        private readonly PlayerModel model;
 
-        public PlayerViewModel(int id, IObservable<Game> game)
+        public Guid Id { get; set; } = Guid.NewGuid();
+
+        public PlayerViewModel(PlayerModel model, IObservable<Game> game)
         {
-            this.id = id;
-            var player = game.Select(g => g.Players.First(p => p.Id == id));
+            this.model = model;
+            var player = game.Select(g => g.Players.First(p => p.Id == model.Spot));
 
             player
                 .Select(p => p.Hand.First())
@@ -27,16 +30,17 @@ namespace PokyPoker.Desktop.ViewModels
                 .Select(p => p.Stack)
                 .ToProperty(this, vm => vm.Currency, out currency);
 
-            game.Select(g => g.GetPlayerState(id).IsCurrent)
+            game.Select(g => g.GetPlayerState(model.Spot).IsCurrent)
                 .ToProperty(this, vm => vm.ShouldAct, out shouldAct);
         }
 
-        public string Name { get; set; }
+        public int Spot => model.Spot;
+
+        public string Name => model.Name;
 
         public Play LastPlay { get; set; }
 
-        public string PhotoUrl { get; set; }
-
+        public string PhotoUrl => model.PhotoUrl;
 
         private readonly ObservableAsPropertyHelper<bool> shouldAct;
         public bool ShouldAct => shouldAct.Value;

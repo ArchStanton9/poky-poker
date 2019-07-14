@@ -58,13 +58,16 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Controls\TableBorderPanel.cs" />
     <Compile Include="Converters.cs" />
     <Compile Include="Model\GameModel.cs" />
+    <Compile Include="Model\PlayerModel.cs" />
     <Compile Include="ViewModels\BoardViewModel.cs" />
     <Compile Include="ViewModels\ChatViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\PlayerViewModel.cs" />
     <Compile Include="ViewModels\PlayOptionsViewModel.cs" />
+    <Compile Include="ViewModels\SpotViewModel.cs" />
     <Compile Include="Views\BoardView.xaml.cs">
       <DependentUpon>BoardView.xaml</DependentUpon>
     </Compile>
@@ -76,6 +79,9 @@
     </Compile>
     <Compile Include="Views\PlayOptionsView.xaml.cs">
       <DependentUpon>PlayOptionsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SpotView.xaml.cs">
+      <DependentUpon>SpotView.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -153,6 +159,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\SpotView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PokyPoker.Domain\PokyPoker.Domain.csproj">
@@ -169,6 +179,9 @@
     </PackageReference>
     <PackageReference Include="ReactiveUI.WPF">
       <Version>9.18.2</Version>
+    </PackageReference>
+    <PackageReference Include="System.Reactive">
+      <Version>4.1.5</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
