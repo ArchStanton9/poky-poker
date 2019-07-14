@@ -9,7 +9,9 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-          <Rectangle x:Name="Rect" Width="100" Height="50" Fill="Azure"/>
-          <local:PlayerView x:Name="PlayerView" />
+        <local:PlayerView x:Name="PlayerView" />
+        <Border x:Name="Rect" BorderBrush="Azure" Opacity="0.6" BorderThickness="4" CornerRadius="5">
+            <Rectangle Margin="10" Width="15" Height="15" Fill="Azure" Opacity="0.6" />
+        </Border>
     </Grid>
 </reactiveUi:ReactiveUserControl>

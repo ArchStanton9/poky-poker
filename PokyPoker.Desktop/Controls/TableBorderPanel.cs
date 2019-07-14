@@ -42,7 +42,7 @@ namespace PokyPoker.Desktop.Controls
             var angle = 0.0;
             var incrementalAngularSpace = 360.0 / Children.Count * (Math.PI / 180);
 
-            var radiusX = finalSize.Width / 2.4;
+            var radiusX = finalSize.Width / 2.6;
             var radiusY = finalSize.Height / 2.4;
             var flat = Math.Abs(Flattening);
             var maxY = flat > 1 ? radiusY : radiusY * flat;
@@ -64,7 +64,7 @@ namespace PokyPoker.Desktop.Controls
                     elem.DesiredSize.Height));
 
                 //Calculate the new _angle for the next element
-                angle += incrementalAngularSpace;
+                angle -= incrementalAngularSpace;
             }
 
             return finalSize;

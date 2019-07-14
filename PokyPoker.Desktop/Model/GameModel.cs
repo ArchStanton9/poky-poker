@@ -31,7 +31,7 @@ namespace PokyPoker.Desktop.Model
 
             playersSource.Add(new PlayerModel
             {
-                Spot = 5,
+                Spot = 4,
                 Name = "Gambler #3",
                 Stack = 6000,
                 PhotoUrl = "Assets/Avatar3.png"
@@ -39,7 +39,7 @@ namespace PokyPoker.Desktop.Model
 
             playersSource.Add(new PlayerModel
             {
-                Spot = 6,
+                Spot = 5,
                 Name = "Gandalf The Grey",
                 Stack = 8000,
                 PhotoUrl = "Assets/Avatar4.png"
