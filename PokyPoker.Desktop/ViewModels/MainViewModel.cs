@@ -27,7 +27,7 @@ namespace PokyPoker.Desktop.ViewModels
 
 
             PlayOptionsViewModel = new PlayOptionsViewModel(gameModel);
-            ChatViewModel = new ChatViewModel();
+            ChatViewModel = new ChatViewModel(Players);
             BoardViewModel = new BoardViewModel(gameModel.ObservableGame);
         }
 
