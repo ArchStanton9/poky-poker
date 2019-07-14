@@ -23,7 +23,7 @@ namespace PokyPoker.Desktop.ViewModels
 
             SendMessageCommand = ReactiveCommand.Create<string>(msg =>
             {
-                var player = players.SingleOrDefault(p => p.ShouldAct);
+                var player = players.SingleOrDefault(p => p.PlayerState.ShouldAct);
                 messagesSource.Add($"{player?.Name ?? "Anonymous"}: {msg}");
             });
         }

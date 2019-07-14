@@ -1,12 +1,12 @@
 ﻿namespace PokyPoker.Domain
 {
-    public struct RoundState
+    public struct PlayerState
     {
         public bool IsActive { get; set; }
-        public bool IsCurrent { get; set; }
+        public bool ShouldAct { get; set; }
         public int Bet { get; set; }
         public Play LastPlay { get; set; }
 
-        public static readonly RoundState Inactive = new RoundState();
+        public static readonly PlayerState Inactive = new PlayerState();
     }
 }

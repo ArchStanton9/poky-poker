@@ -140,18 +140,19 @@ namespace PokyPoker.Domain
             return new Game(Rules, players, Table, rounds);
         }
 
-        public RoundState GetPlayerState(int id)
+        public PlayerState GetPlayerState(int id)
         {
             var player = Players.First(p => p.Id == id);
             if (!player.IsActive)
-                return RoundState.Inactive;
+                return PlayerState.Inactive;
 
-            return new RoundState
+            var lastPlay = CurrentRound.LastPlay(id);
+            return new PlayerState
             {
                 Bet = CurrentRound.PlayerBet(id),
-                IsActive = true,
-                IsCurrent = id == CurrentPlayer.Id,
-                LastPlay = CurrentRound.LastPlay(id)
+                IsActive = lastPlay != Play.Fold,
+                ShouldAct = id == CurrentPlayer.Id,
+                LastPlay = lastPlay
             };
         }
 

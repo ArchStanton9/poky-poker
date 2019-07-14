@@ -1,6 +1,8 @@
 ﻿using System.Reactive.Disposables;
+using System.Windows;
 using System.Windows.Media;
 using PokyPoker.Desktop.ViewModels;
+using PokyPoker.Domain;
 using ReactiveUI;
 
 namespace PokyPoker.Desktop.Views
@@ -31,9 +33,23 @@ namespace PokyPoker.Desktop.Views
                     .DisposeWith(cleanUp);
 
                 this.OneWayBind(ViewModel,
-                    vm => vm.ShouldAct,
+                    vm => vm.PlayerState,
                     v => v.PlayerBorder.BorderBrush,
-                    x => x ? Brushes.DodgerBlue : Brushes.DarkGray);
+                    x => x.ShouldAct ? Brushes.DodgerBlue : Brushes.DarkGray);
+
+                this.OneWayBind(ViewModel,
+                        vm => vm.PlayerState, v => v.LastPlayLabel.Content,
+                        s => $"{s.LastPlay} {s.Bet}")
+                    .DisposeWith(cleanUp);
+
+                this.OneWayBind(ViewModel,
+                        vm => vm.PlayerState, v => v.LastPlayLabel.Visibility,
+                        s => s.LastPlay == Play.None ? Visibility.Hidden : Visibility.Visible)
+                    .DisposeWith(cleanUp);
+
+                this.OneWayBind(ViewModel,
+                    vm => vm.PlayerState, v => v.HandView.Visibility,
+                    s => s.IsActive ? Visibility.Visible : Visibility.Hidden);
             });
         }
     }
