@@ -23,6 +23,22 @@
                                  HorizontalAlignment="Center"/>
             </Grid>
 
+            <ItemsControl x:Name="TableSpotsList"
+                Width="{Binding ActualWidth, ElementName=TableCanvas}"
+                Height="{Binding ActualHeight, ElementName=TableCanvas}"
+                Padding="150 100">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <controls:TableBorderPanel Flattening="0.75"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <views:TableSpotView ViewModel="{Binding}"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
             <ItemsControl x:Name="SpotsList" 
                           Width="{Binding ActualWidth, ElementName=TableCanvas}"
                           Height="{Binding ActualHeight, ElementName=TableCanvas}">

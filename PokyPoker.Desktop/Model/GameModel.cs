@@ -65,10 +65,9 @@ namespace PokyPoker.Desktop.Model
 
             if (game.IsComplete)
             {
-                var result = game.GetResult();
-                var players = new Queue<Player>(result);
-                var player = players.Dequeue();
-                players.Enqueue(player);
+                var players = game.Players.ToList();
+                players.Add(players[0]);
+                players.RemoveAt(0);
 
                 game = Game.StartNew(BettingRules.Standard, players.ToArray(), Deck.BuildStandard());
             }

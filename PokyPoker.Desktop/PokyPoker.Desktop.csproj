@@ -83,6 +83,9 @@
     <Compile Include="Views\SpotView.xaml.cs">
       <DependentUpon>SpotView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\TableSpotView.xaml.cs">
+      <DependentUpon>TableSpotView.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controls\CardView.cs" />
@@ -160,6 +163,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\SpotView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\TableSpotView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

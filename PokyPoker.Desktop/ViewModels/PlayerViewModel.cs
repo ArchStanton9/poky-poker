@@ -21,6 +21,10 @@ namespace PokyPoker.Desktop.ViewModels
                 .Select(g => g.GetPlayerState(model.Player))
                 .ToProperty(this, vm => vm.PlayerState, out playerState);
 
+            game
+                .Select(g => g.Dealer.Spot == Spot)
+                .ToProperty(this, vm => vm.IsDealer, out isDealer);
+
             player
                 .Select(p => p.Hand.First())
                 .ToProperty(this, vm => vm.LeftCard, out leftCard);
@@ -39,6 +43,9 @@ namespace PokyPoker.Desktop.ViewModels
         public string Name => model.Name;
 
         public string PhotoUrl => model.PhotoUrl;
+
+        private readonly ObservableAsPropertyHelper<bool> isDealer;
+        public bool IsDealer => isDealer.Value;
 
         private readonly ObservableAsPropertyHelper<PlayerState> playerState;
         public PlayerState PlayerState => playerState.Value;

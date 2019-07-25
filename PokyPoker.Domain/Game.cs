@@ -21,11 +21,14 @@ namespace PokyPoker.Domain
         public Hand Table { get; }
         public ImmutableArray<Round> Rounds { get; }
 
+        
         public IList<Player> ActivePlayers => Players.Where(p => p.IsActive).ToArray();
 
         public Stage Stage => (Stage) Rounds.Length;
 
         public Round CurrentRound => Rounds.Last();
+
+        public Player Dealer => Players.Last();
 
         public Card[] CurrentTable => CropTable(Table, Stage);
 
@@ -37,7 +40,7 @@ namespace PokyPoker.Domain
 
         public Player CurrentPlayer => ActivePlayers
             .OrderBy(p => CurrentRound.LastPlay(p))
-            .ThenBy(p => p.Spot)
+            .ThenBy(p => Players.IndexOf(p))
             .First(p => CurrentRound.ShouldAct(p));
 
         public static Game StartNew(BettingRules rules, Player[] players, Deck deck)
