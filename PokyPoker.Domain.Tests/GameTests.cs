@@ -38,7 +38,7 @@ namespace PokyPoker.Domain.Tests
         [Test]
         public void Left_for_big_blind_should_act_first()
         {
-            game.CurrentPlayer.Id.Should().Be(p3.Id);
+            game.CurrentPlayer.Spot.Should().Be(p3.Spot);
         }
 
         [Test]
@@ -93,7 +93,7 @@ namespace PokyPoker.Domain.Tests
             };
 
             game = Game.StartNew(rules, players, deck.Take(5));
-            game.CurrentPlayer.Id.Should().Be(6);
+            game.CurrentPlayer.Spot.Should().Be(6);
         }
 
         [Test]
@@ -112,7 +112,7 @@ namespace PokyPoker.Domain.Tests
                 .MakeAct(Play.Check)
                 .NextRound();
 
-            game.CurrentPlayer.Id.Should().Be(0);
+            game.CurrentPlayer.Spot.Should().Be(0);
         }
     }
 }

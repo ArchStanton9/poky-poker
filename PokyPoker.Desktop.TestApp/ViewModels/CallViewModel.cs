@@ -19,7 +19,7 @@ namespace PokyPoker.Desktop.TestApp.ViewModels
 
                 var game = model.Game;
                 var maxBet = game.CurrentRound.MaxBet;
-                var playerBet = game.GetPlayerState(game.CurrentPlayer.Id).Bet;
+                var playerBet = game.GetPlayerState(game.CurrentPlayer.Spot).Bet;
 
                 model.MakeAct(Play.Call, maxBet - playerBet);
             });
@@ -28,7 +28,7 @@ namespace PokyPoker.Desktop.TestApp.ViewModels
         private static string FormDisplayName(Game game)
         {
             var maxBet = game.CurrentRound.MaxBet;
-            var playerBet = game.GetPlayerState(game.CurrentPlayer.Id).Bet;
+            var playerBet = game.GetPlayerState(game.CurrentPlayer.Spot).Bet;
 
             return $"Call ({maxBet - playerBet})";
         }

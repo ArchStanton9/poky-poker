@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using DynamicData;
 using PokyPoker.Domain;
 using ReactiveUI;
@@ -12,45 +13,34 @@ namespace PokyPoker.Desktop.Model
     {
         public GameModel()
         {
+            var deck = Deck.BuildStandard();
             playersSource = new SourceList<PlayerModel>();
-            playersSource.Add(new PlayerModel
+            playersSource.Add(new PlayerModel(new Player(0, deck.Take(2), true, 5000))
             {
-                Spot = 0,
                 Name = "Johnny \"The Fox\"",
-                Stack = 5000,
                 PhotoUrl = "Assets/Avatar1.png"
             });
 
-            playersSource.Add(new PlayerModel
+            playersSource.Add(new PlayerModel(new Player(1, deck.Take(2), true, 4500))
             {
-                Spot = 1,
                 Name = "Poker Queen",
-                Stack = 4500,
                 PhotoUrl = "Assets/Avatar2.png"
             });
 
-            playersSource.Add(new PlayerModel
+            playersSource.Add(new PlayerModel(new Player(2, deck.Take(2), true, 6000))
             {
-                Spot = 2,
                 Name = "Gambler #3",
-                Stack = 6000,
                 PhotoUrl = "Assets/Avatar3.png"
             });
 
-            playersSource.Add(new PlayerModel
+            playersSource.Add(new PlayerModel(new Player(3, deck.Take(2), true, 8000))
             {
-                Spot = 3,
                 Name = "Gandalf The Grey",
-                Stack = 8000,
                 PhotoUrl = "Assets/Avatar4.png"
             });
 
-            var deck = Deck.BuildStandard();
-            var players = playersSource.Items
-                .Select(p => new Player(p.Spot, deck.Take(2), true, p.Stack))
-                .ToArray();
-
-            Game = Game.StartNew(BettingRules.Standard, players, deck.Take(5));
+            Game = Game.StartNew(BettingRules.Standard, playersSource.Items.Select(i => i.Player).ToArray(),
+                deck.Take(5));
             ObservableGame = this.WhenAnyValue(m => m.Game);
         }
 
@@ -81,11 +71,6 @@ namespace PokyPoker.Desktop.Model
                 players.Enqueue(player);
 
                 game = Game.StartNew(BettingRules.Standard, players.ToArray(), Deck.BuildStandard());
-            }
-
-            if (game.CurrentRound.IsComplete)
-            {
-                game = game.NextRound();
             }
 
             return game;

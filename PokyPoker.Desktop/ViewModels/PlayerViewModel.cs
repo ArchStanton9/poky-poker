@@ -15,10 +15,10 @@ namespace PokyPoker.Desktop.ViewModels
         {
             this.model = model;
 
-            var player = game.Select(g => g.Players.First(p => p.Id == model.Spot));
+            var player = game.Select(g => g.Players.First(p => p.Spot == model.Spot));
             game
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .Select(g => g.GetPlayerState(Spot))
+                .Select(g => g.GetPlayerState(model.Player))
                 .ToProperty(this, vm => vm.PlayerState, out playerState);
 
             player

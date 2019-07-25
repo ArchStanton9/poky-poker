@@ -13,7 +13,7 @@ namespace PokyPoker.Desktop.TestApp.ViewModels
             var model = new GameModel();
 
             Players = new ObservableCollection<PlayerViewModel>(model.Players.Select(p =>
-                new PlayerViewModel(p.Id, model.ObservableGame)));
+                new PlayerViewModel(p.Spot, model.ObservableGame)));
 
             Table = new TableViewModel(model.ObservableGame);
             PlayOptionsViewModel = new PlayOptionsViewModel(model);

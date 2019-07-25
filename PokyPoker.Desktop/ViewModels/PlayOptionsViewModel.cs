@@ -56,7 +56,7 @@ namespace PokyPoker.Desktop.ViewModels
             if (maxBet == 0)
                 return game.Rules.BigBlind;
 
-            var playerBet = game.GetPlayerState(game.CurrentPlayer.Id).Bet;
+            var playerBet = game.GetPlayerState(game.CurrentPlayer).Bet;
             return maxBet - playerBet;
         }
 

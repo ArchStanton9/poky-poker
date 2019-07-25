@@ -17,11 +17,11 @@ namespace PokyPoker.Desktop.TestApp.ViewModels
                 .ToProperty(this, p => p.RoundState, out roundState);
 
             observableGame
-                .Select(g => g.Players.First(p => p.Id == playerSpot).Stack)
+                .Select(g => g.Players.First(p => p.Spot == playerSpot).Stack)
                 .ToProperty(this, p => p.Bank, out bank);
 
             Hand = new HandViewModel(
-                observableGame.Select(g => g.Players.First(p => p.Id == playerSpot).Hand),
+                observableGame.Select(g => g.Players.First(p => p.Spot == playerSpot).Hand),
                 observableGame.Select(g => g.CurrentTable)
             );
         }

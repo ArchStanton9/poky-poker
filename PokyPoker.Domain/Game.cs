@@ -22,22 +22,28 @@ namespace PokyPoker.Domain
         public ImmutableArray<Round> Rounds { get; }
 
         public IList<Player> ActivePlayers => Players.Where(p => p.IsActive).ToArray();
+
         public Stage Stage => (Stage) Rounds.Length;
+
         public Round CurrentRound => Rounds.Last();
+
         public Card[] CurrentTable => CropTable(Table, Stage);
+
         public bool IsComplete => Stage == Stage.River && CurrentRound.IsComplete;
+
         public Pot MainPot => SplitPot().Take(1).Single();
+
         public IEnumerable<Pot> SidePots => SplitPot().Skip(1);
 
         public Player CurrentPlayer => ActivePlayers
-            .OrderBy(p => CurrentRound.LastPlay(p.Id))
-            .ThenBy(p => p.Id)
-            .First(p => CurrentRound.ShouldAct(p.Id));
+            .OrderBy(p => CurrentRound.LastPlay(p))
+            .ThenBy(p => p.Spot)
+            .First(p => CurrentRound.ShouldAct(p));
 
         public static Game StartNew(BettingRules rules, Player[] players, Deck deck)
         {
             var activePlayers = players
-                .Select(p => new Player(p.Id, deck.Take(2), true, p.Stack))
+                .Select(p => new Player(p.Spot, deck.Take(2), true, p.Stack))
                 .ToArray();
 
             var table = deck.Take(5);
@@ -50,15 +56,16 @@ namespace PokyPoker.Domain
                 throw new GameLogicException("Can't start round. Not enough players.");
 
             if (rules.BigBlind == 0)
-                return new Game(rules, players.ToImmutableArray(), table, ImmutableArray.Create(Round.StartNew(players.Length)));
+                return new Game(rules, players.ToImmutableArray(), table,
+                    ImmutableArray.Create(Round.StartNew(players)));
 
             var acts = new[]
             {
-                new Act(players[0].Id, Play.Blind, rules.SmallBlind),
-                new Act(players[1].Id, Play.Blind, rules.BigBlind)
+                new Act(players[0], Play.Blind, rules.SmallBlind),
+                new Act(players[1], Play.Blind, rules.BigBlind)
             };
 
-            var round = new Round(acts, players.Length);
+            var round = new Round(acts, players);
             var rounds = ImmutableArray.Create(round);
 
             var blindPlayers = new[]
@@ -80,35 +87,12 @@ namespace PokyPoker.Domain
             if (!CurrentRound.IsComplete)
                 throw new GameLogicException("Can't start next round. Current is incomplete.");
 
-            var players = KeepActive(Players.ToArray(), CurrentRound.ActivePlayers);
-            var next = Round.StartNew(players.Count(p => p.IsActive));
+            var next = Round.StartNew(CurrentRound.ActivePlayers.ToArray());
             var rounds = Rounds.Add(next);
 
-            return new Game(Rules, players, Table, rounds);
+            return new Game(Rules, Players, Table, rounds);
         }
 
-        private ImmutableArray<Player> KeepActive(IList<Player> players, IEnumerable<int> active)
-        {
-            var activePlayers = new HashSet<int>(active);
-            var result = new Player[players.Count];
-
-            var activeIndex = 0;
-            for (var i = 0; i < players.Count; i++)
-            {
-                if (players[i].IsActive)
-                {
-                    if (!activePlayers.Contains(activeIndex++))
-                    {
-                        result[i] = players[i].MakeInactive();
-                        continue;
-                    }
-                }
-
-                result[i] = players[i];
-            }
-
-            return result.ToImmutableArray();
-        }
 
         public Game MakeAct(Play play, int bet = 0)
         {
@@ -117,10 +101,10 @@ namespace PokyPoker.Domain
 
         public Game MakeAct(Player player, Play play, int bet = 0)
         {
-            if (CurrentRound.IsComplete)
-                throw new GameOrderException("Can not make act. Round is complete");
+            if (IsComplete)
+                throw new GameOrderException("Can not make act. Game is complete");
 
-            if (player.Id != CurrentPlayer.Id)
+            if (player.Spot != CurrentPlayer.Spot)
                 throw new GameOrderException($"Current player is {CurrentPlayer}");
 
             var options = GetOptions();
@@ -133,25 +117,30 @@ namespace PokyPoker.Domain
             if (play == Play.Raise && player.Stack == bet)
                 play = Play.AllIn;
 
-            var act = new Act(player.Id, play, bet);
+            var playerAfter = new Player(player.Spot, player.Hand, play != Play.Fold, player.Stack - bet);
+            var act = new Act(playerAfter, play, bet);
             var rounds = Rounds.Replace(CurrentRound, CurrentRound.MakeAct(act));
-            var players = Players.Replace(player, player.WithStack(s => s - bet));
+            var players = Players.Replace(player, act.Player);
 
-            return new Game(Rules, players, Table, rounds);
+
+            var game = new Game(Rules, players, Table, rounds);
+            if (game.IsComplete)
+                return game;
+
+            return game.CurrentRound.IsComplete ? game.NextRound() : game;
         }
 
-        public PlayerState GetPlayerState(int id)
+        public PlayerState GetPlayerState(Player player)
         {
-            var player = Players.First(p => p.Id == id);
-            if (!player.IsActive)
+            if (CurrentRound.ActivePlayers.All(p => p.Spot != player.Spot))
                 return PlayerState.Inactive;
 
-            var lastPlay = CurrentRound.LastPlay(id);
+            var lastPlay = CurrentRound.LastPlay(player);
             return new PlayerState
             {
-                Bet = CurrentRound.PlayerBet(id),
+                Bet = CurrentRound.PlayerBet(player),
                 IsActive = lastPlay != Play.Fold,
-                ShouldAct = id == CurrentPlayer.Id,
+                ShouldAct = player == CurrentPlayer,
                 LastPlay = lastPlay
             };
         }
@@ -161,7 +150,9 @@ namespace PokyPoker.Domain
             if (CurrentRound.IsComplete)
                 return Array.Empty<Play>();
 
-            var options = CurrentRound.GetOptions(CurrentPlayer.Id).ToImmutableArray();
+            var options = CurrentRound
+                .GetOptions(CurrentPlayer)
+                .ToImmutableArray();
 
             if (CurrentRound.MaxBet >= CurrentPlayer.Stack)
             {
@@ -180,14 +171,14 @@ namespace PokyPoker.Domain
         private IEnumerable<Pot> SplitPot()
         {
             var acts = Rounds.SelectMany(r => r.Acts).ToArray();
-            var playersBets = Players.ToDictionary(p => p.Id, p => 0);
+            var playersBets = Players.ToDictionary(p => p.Spot, p => 0);
 
             var allInBets = new List<int>();
             foreach (var act in acts)
             {
-                playersBets[act.Player] += act.Bet;
+                playersBets[act.Player.Spot] += act.Bet;
                 if (act.Play == Play.AllIn)
-                    allInBets.Add(playersBets[act.Player]);
+                    allInBets.Add(playersBets[act.Player.Spot]);
             }
 
             if (!allInBets.Any())
@@ -211,16 +202,16 @@ namespace PokyPoker.Domain
 
                 foreach (var player in players)
                 {
-                    if (playersBets[player.Id] >= contribution)
+                    if (playersBets[player.Spot] >= contribution)
                     {
                         contenders.Add(player);
-                        playersBets[player.Id] -= contribution;
+                        playersBets[player.Spot] -= contribution;
                         amount += contribution;
                     }
                     else
                     {
-                        amount += playersBets[player.Id];
-                        playersBets[player.Id] = 0;
+                        amount += playersBets[player.Spot];
+                        playersBets[player.Spot] = 0;
                     }
                 }
 
@@ -244,20 +235,20 @@ namespace PokyPoker.Domain
                 if (pot.Contenders.Count() == 1)
                 {
                     var winner = pot.Contenders.Single();
-                    var index = Array.FindIndex(result, p => p.Id == winner.Id);
+                    var index = Array.FindIndex(result, p => p.Spot == winner.Spot);
                     result[index] = winner.WithStack(s => s + pot);
                     continue;
                 }
 
                 var winners = GetWinners(Players)
-                    .Select(p => p.Id)
+                    .Select(p => p.Spot)
                     .ToImmutableHashSet();
 
                 var gain = pot / winners.Count;
 
                 for (var i = 0; i < Players.Length; i++)
                 {
-                    if (winners.Contains(Players[i].Id))
+                    if (winners.Contains(Players[i].Spot))
                     {
                         result[i] = result[i].WithStack(s => s + gain);
                     }

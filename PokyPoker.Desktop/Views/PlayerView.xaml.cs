@@ -49,7 +49,10 @@ namespace PokyPoker.Desktop.Views
 
                 this.OneWayBind(ViewModel,
                     vm => vm.PlayerState, v => v.HandView.Visibility,
-                    s => s.IsActive ? Visibility.Visible : Visibility.Hidden);
+                    s =>
+                    {
+                        return s.IsActive ? Visibility.Visible : Visibility.Hidden;
+                    });
             });
         }
     }
