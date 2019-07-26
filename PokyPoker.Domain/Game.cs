@@ -21,7 +21,6 @@ namespace PokyPoker.Domain
         public Hand Table { get; }
         public ImmutableArray<Round> Rounds { get; }
 
-        
         public IList<Player> ActivePlayers => Players.Where(p => p.IsActive).ToArray();
 
         public Stage Stage => (Stage) Rounds.Length;
@@ -128,7 +127,7 @@ namespace PokyPoker.Domain
 
             var game = new Game(Rules, players, Table, rounds);
             if (game.IsComplete)
-                return game;
+                return new Game(Rules, GetResult(), Table, rounds);
 
             return game.CurrentRound.IsComplete ? game.NextRound() : game;
         }
@@ -228,37 +227,30 @@ namespace PokyPoker.Domain
             );
         }
 
-        public Player[] GetResult()
+        public ImmutableArray<Player> GetResult()
         {
             var pots = SplitPot();
-            var result = Players.ToArray();
+            var players = Players;
 
             foreach (var pot in pots)
             {
                 if (pot.Contenders.Count() == 1)
                 {
                     var winner = pot.Contenders.Single();
-                    var index = Array.FindIndex(result, p => p.Spot == winner.Spot);
-                    result[index] = winner.WithStack(s => s + pot);
+                    players = players.Replace(winner, winner.WithStack(s => s + pot));
                     continue;
                 }
 
-                var winners = GetWinners(Players)
-                    .Select(p => p.Spot)
-                    .ToImmutableHashSet();
-
+                var winners = GetWinners(ActivePlayers).ToList();
                 var gain = pot / winners.Count;
 
-                for (var i = 0; i < Players.Length; i++)
+                foreach (var winner in winners)
                 {
-                    if (winners.Contains(Players[i].Spot))
-                    {
-                        result[i] = result[i].WithStack(s => s + gain);
-                    }
+                    players = players.Replace(winner, winner.WithStack(s => s + gain));
                 }
             }
 
-            return result;
+            return players;
         }
 
         private IEnumerable<Player> GetWinners(IEnumerable<Player> players)
