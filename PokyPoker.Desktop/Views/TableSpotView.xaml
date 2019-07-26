@@ -21,7 +21,10 @@
         </Grid>
         
         <Grid Grid.Column="1" Margin="2">
-            <Label x:Name="BetLabel" VerticalAlignment="Center" HorizontalAlignment="Center" Background="White"/>
+            <Label x:Name="BetLabel"
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Center"
+                   Style="{StaticResource CurrencyLabelStyle}"/>
         </Grid>
 
     </Grid>

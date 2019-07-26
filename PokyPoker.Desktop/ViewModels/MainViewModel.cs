@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
 using DynamicData;
-using DynamicData.Binding;
 using PokyPoker.Desktop.Model;
 using ReactiveUI;
 
@@ -11,10 +10,12 @@ namespace PokyPoker.Desktop.ViewModels
 {
     public class MainViewModel : ReactiveObject
     {
+        public TimeSpan ShowdownDelay { get; set; } = TimeSpan.FromSeconds(8);
+
         public MainViewModel()
         {
             var gameModel = new GameModel();
-            
+
             Spots = new ObservableCollection<SpotViewModel>();
 
             var playersSource = gameModel.Players
@@ -29,6 +30,14 @@ namespace PokyPoker.Desktop.ViewModels
             PlayOptionsViewModel = new PlayOptionsViewModel(gameModel);
             ChatViewModel = new ChatViewModel(Players);
             BoardViewModel = new BoardViewModel(gameModel.ObservableGame);
+
+            gameModel.ObservableGame
+                .Select(g => g.IsComplete)
+                .Where(g => g)
+                .Delay(ShowdownDelay)
+                .ObserveOnDispatcher()
+                .Do(b => gameModel.StartNext())
+                .Subscribe();
         }
 
         private readonly ReadOnlyObservableCollection<PlayerViewModel> players;

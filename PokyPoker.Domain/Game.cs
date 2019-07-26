@@ -37,10 +37,7 @@ namespace PokyPoker.Domain
 
         public IEnumerable<Pot> SidePots => SplitPot().Skip(1);
 
-        public Player CurrentPlayer => ActivePlayers
-            .OrderBy(p => CurrentRound.LastPlay(p))
-            .ThenBy(p => Players.IndexOf(p))
-            .First(p => CurrentRound.ShouldAct(p));
+        public Player CurrentPlayer => GetCurrentPlayer();
 
         public static Game StartNew(BettingRules rules, Player[] players, Deck deck)
         {
@@ -61,6 +58,9 @@ namespace PokyPoker.Domain
                 return new Game(rules, players.ToImmutableArray(), table,
                     ImmutableArray.Create(Round.StartNew(players)));
 
+            players[0] = players[0].WithStack(s => s - rules.SmallBlind);
+            players[1] = players[1].WithStack(s => s - rules.BigBlind);
+
             var acts = new[]
             {
                 new Act(players[0], Play.Blind, rules.SmallBlind),
@@ -70,15 +70,7 @@ namespace PokyPoker.Domain
             var round = new Round(acts, players);
             var rounds = ImmutableArray.Create(round);
 
-            var blindPlayers = new[]
-            {
-                players[0].WithStack(s => s - rules.SmallBlind),
-                players[1].WithStack(s => s - rules.BigBlind)
-            };
-
-            var playersList = blindPlayers.Concat(players.Skip(2)).ToImmutableArray();
-
-            return new Game(rules, playersList, table, rounds);
+            return new Game(rules, players.ToImmutableArray(), table, rounds);
         }
 
         private Game NextRound()
@@ -145,6 +137,21 @@ namespace PokyPoker.Domain
                 ShouldAct = player == CurrentPlayer,
                 LastPlay = lastPlay
             };
+        }
+
+        private Player GetCurrentPlayer()
+        {
+            var players = ActivePlayers
+                .OrderBy(p => CurrentRound.LastPlay(p))
+                .ThenBy(p => Players.IndexOf(p));
+
+            foreach (var player in players)
+            {
+                if (CurrentRound.ShouldAct(player))
+                    return player;
+            }
+
+            return Dealer;
         }
 
         public Play[] GetOptions()

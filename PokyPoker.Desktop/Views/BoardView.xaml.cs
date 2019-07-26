@@ -18,7 +18,7 @@ namespace PokyPoker.Desktop.Views
                 this.OneWayBind(ViewModel, vm => vm.BoardCards, v => v.BoardCardsList.ItemsSource)
                     .DisposeWith(cleanUp);
 
-                this.OneWayBind(ViewModel, vm => vm.Pot, v => v.PotTextBox.Content)
+                this.OneWayBind(ViewModel, vm => vm.Pot, v => v.PotTextLabel.Content)
                     .DisposeWith(cleanUp);
 
                 this.OneWayBind(ViewModel, vm => vm.SidePots, v => v.SidePotsList.ItemsSource)

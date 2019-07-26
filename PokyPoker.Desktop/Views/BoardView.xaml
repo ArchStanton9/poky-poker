@@ -39,15 +39,7 @@
 
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-            <Border x:Name="MainPotBorder"
-                    Background="WhiteSmoke"
-                    BorderBrush="WhiteSmoke"
-                    BorderThickness="2"
-                    CornerRadius="4"
-                    HorizontalAlignment="Center">
-                <Label x:Name="PotTextBox" HorizontalAlignment="Center" />
-            </Border>
-
+            <Label x:Name="PotTextLabel" HorizontalAlignment="Center" Style="{StaticResource CurrencyLabelStyle}" />
             <ItemsControl x:Name="SidePotsList">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>

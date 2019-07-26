@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Linq;
 using DynamicData;
 using PokyPoker.Domain;
 using ReactiveUI;
@@ -53,26 +51,21 @@ namespace PokyPoker.Desktop.Model
 
         public IObservable<Game> ObservableGame { get; }
 
-        
-        public void MakeAct(Play play, int bet = 0)
+        public void StartNext()
         {
-            Game = MakeAct(Game, play, bet);
-        }
-
-        private static Game MakeAct(Game game, Play play, int bet = 0)
-        {
-            game = game.MakeAct(play, bet);
-
-            if (game.IsComplete)
+            if (Game.IsComplete)
             {
-                var players = game.Players.ToList();
+                var players = Game.Players.ToList();
                 players.Add(players[0]);
                 players.RemoveAt(0);
 
-                game = Game.StartNew(BettingRules.Standard, players.ToArray(), Deck.BuildStandard());
+                Game = Game.StartNew(BettingRules.Standard, players.ToArray(), Deck.BuildStandard());
             }
+        }
 
-            return game;
+        public void MakeAct(Play play, int bet = 0)
+        {
+            Game = Game.MakeAct(play, bet);
         }
     }
 }
