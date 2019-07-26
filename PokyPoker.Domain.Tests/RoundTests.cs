@@ -9,22 +9,31 @@ namespace PokyPoker.Domain.Tests
     {
         private Round initialRound;
 
+        private Player player1;
+        private Player player2;
+
+
+
         [SetUp]
         public void SetUp()
         {
+            var deck = Deck.BuildStandard();
+            player1 = new Player(0, deck.Take(2), true, 5000);
+            player2 = new Player(1, deck.Take(2), true, 10000);
+
             initialRound = new Round(new[]
             {
-                new Act(0, Play.Blind, 20),
-                new Act(1, Play.Blind, 40),
-            }, 2);
+                new Act(player1, Play.Blind, 20),
+                new Act(player2, Play.Blind, 40),
+            }, new[] {player1, player2});
         }
 
         [Test]
         public void Can_complete()
         {
             initialRound = initialRound
-                .MakeAct(0, Play.Call, 20)
-                .MakeAct(1, Play.Check);
+                .MakeAct(player1, Play.Call, 20)
+                .MakeAct(player2, Play.Check);
 
             initialRound.IsComplete.Should().BeTrue();
         }
@@ -32,19 +41,8 @@ namespace PokyPoker.Domain.Tests
         [Test]
         public void Can_call_for_big_blind()
         {
-            initialRound.Invoking(r => r.MakeAct(0, Play.Call, 20))
+            initialRound.Invoking(r => r.MakeAct(player1, Play.Call, 20))
                 .Should().NotThrow<GameException>();
-        }
-
-        [Test]
-        public void Can_Complete_round_with_3_players()
-        {
-            var round = Round.StartNew(3)
-                .MakeAct(0, Play.Bet, 5)
-                .MakeAct(1, Play.Fold)
-                .MakeAct(2, Play.Call, 5);
-
-            round.IsComplete.Should().BeTrue();
         }
     }
 }

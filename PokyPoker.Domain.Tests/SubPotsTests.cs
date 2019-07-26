@@ -40,11 +40,11 @@ namespace PokyPoker.Domain.Tests
                 .MakeAct(Play.Raise, 100)
                 .MakeAct(Play.Call, 80)
                 .MakeAct(Play.Call, 60)
-                .NextRound()
+                // NextRound
                 .MakeAct(Play.Bet, 100)
                 .MakeAct(Play.AllIn, 100)
                 .MakeAct(Play.Call, 100)
-                .NextRound()
+                // NextRound
                 .MakeAct(Play.Bet, 50)
                 .MakeAct(Play.Raise, 100);
 

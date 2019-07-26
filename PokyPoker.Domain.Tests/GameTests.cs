@@ -47,7 +47,7 @@ namespace PokyPoker.Domain.Tests
             game.MakeAct(Play.Call, 40)
                 .MakeAct(Play.Fold)
                 .MakeAct(Play.Check)
-                .NextRound()
+                // next round
                 .MakeAct(Play.Check)
                 .MakeAct(Play.Check);
         }
@@ -78,8 +78,8 @@ namespace PokyPoker.Domain.Tests
                 .MakeAct(Play.Fold)
                 .MakeAct(Play.Fold);
 
-            var result = game.GetResult();
-            result[2].Stack.Should().Be(160);
+            game.IsComplete.Should().BeTrue();
+            game.Players[2].Stack.Should().Be(160);
         }
 
         [Test]
@@ -109,8 +109,7 @@ namespace PokyPoker.Domain.Tests
             game = Game.StartNew(rules, players, deck.Take(5))
                 .MakeAct(Play.Fold)
                 .MakeAct(Play.Call, 20)
-                .MakeAct(Play.Check)
-                .NextRound();
+                .MakeAct(Play.Check);
 
             game.CurrentPlayer.Spot.Should().Be(0);
         }

@@ -31,7 +31,7 @@ namespace PokyPoker.Domain
 
         public Card[] CurrentTable => CropTable(Table, Stage);
 
-        public bool IsComplete => Stage == Stage.River && CurrentRound.IsComplete;
+        public bool IsComplete => (Stage == Stage.River && CurrentRound.IsComplete) || ActivePlayers.Count == 1;
 
         public Pot MainPot => SplitPot().Take(1).Single();
 
@@ -81,7 +81,7 @@ namespace PokyPoker.Domain
             return new Game(rules, playersList, table, rounds);
         }
 
-        public Game NextRound()
+        private Game NextRound()
         {
             if (IsComplete)
                 throw new GameLogicException("Can't start next round. Game is over.");
@@ -127,7 +127,7 @@ namespace PokyPoker.Domain
 
             var game = new Game(Rules, players, Table, rounds);
             if (game.IsComplete)
-                return new Game(Rules, GetResult(), Table, rounds);
+                return new Game(Rules, GetResult(players), Table, rounds);
 
             return game.CurrentRound.IsComplete ? game.NextRound() : game;
         }
@@ -227,10 +227,9 @@ namespace PokyPoker.Domain
             );
         }
 
-        public ImmutableArray<Player> GetResult()
+        public ImmutableArray<Player> GetResult(ImmutableArray<Player> players)
         {
             var pots = SplitPot();
-            var players = Players;
 
             foreach (var pot in pots)
             {
@@ -241,7 +240,7 @@ namespace PokyPoker.Domain
                     continue;
                 }
 
-                var winners = GetWinners(ActivePlayers).ToList();
+                var winners = GetWinners(players.Where(p => p.IsActive)).ToList();
                 var gain = pot / winners.Count;
 
                 foreach (var winner in winners)
