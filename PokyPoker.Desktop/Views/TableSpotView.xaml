@@ -9,10 +9,20 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+
         <Grid x:Name="DealerButton">
             <Ellipse Width="25" Height="25" Fill="White"/>
             <Label Content="D" VerticalAlignment="Center" HorizontalAlignment="Center"/>
         </Grid>
         
+        <Grid Grid.Column="1" Margin="2">
+            <Label x:Name="BetLabel" VerticalAlignment="Center" HorizontalAlignment="Center" Background="White"/>
+        </Grid>
+
     </Grid>
 </reactiveUi:ReactiveUserControl>

@@ -10,18 +10,13 @@
     mc:Ignorable="d"
     d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-
 
         <StackPanel x:Name="HandView" Orientation="Horizontal" HorizontalAlignment="Center">
             <controls:CardView x:Name="LeftCardView"/>
             <controls:CardView x:Name="RightCardView" Margin="-20 0 0 0"/>
         </StackPanel>
 
-        <Border Grid.Row="0" x:Name="PlayerBorder" BorderBrush="Gray" Margin="0 40 0 0" BorderThickness="3" CornerRadius="4">
+        <Border x:Name="PlayerBorder" BorderBrush="Gray" Margin="0 40 0 0" BorderThickness="3" CornerRadius="4">
             <Grid Background="Azure">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -57,14 +52,5 @@
             </Grid>
 
         </Border>
-
-        <Label x:Name="LastPlayLabel"
-               Grid.Row="1"
-               Panel.ZIndex="-20"
-               Background="Azure"
-               BorderBrush="Gray"
-               Margin="5 -5 50 0"
-               BorderThickness="2 0 2 2"/>
-
     </Grid>
 </reactiveUi:ReactiveUserControl>

@@ -38,21 +38,8 @@ namespace PokyPoker.Desktop.Views
                     x => x.ShouldAct ? Brushes.DodgerBlue : Brushes.DarkGray);
 
                 this.OneWayBind(ViewModel,
-                        vm => vm.PlayerState, v => v.LastPlayLabel.Content,
-                        s => $"{s.LastPlay} {s.Bet}")
-                    .DisposeWith(cleanUp);
-
-                this.OneWayBind(ViewModel,
-                        vm => vm.PlayerState, v => v.LastPlayLabel.Visibility,
-                        s => s.LastPlay == Play.None ? Visibility.Hidden : Visibility.Visible)
-                    .DisposeWith(cleanUp);
-
-                this.OneWayBind(ViewModel,
                     vm => vm.PlayerState, v => v.HandView.Visibility,
-                    s =>
-                    {
-                        return s.IsActive ? Visibility.Visible : Visibility.Hidden;
-                    });
+                    s => s.IsActive ? Visibility.Visible : Visibility.Hidden);
             });
         }
     }

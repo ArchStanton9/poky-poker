@@ -18,7 +18,7 @@ namespace PokyPoker.Desktop.Views
             {
                 this.OneWayBind(ViewModel,
                         vm => vm.PlayerViewModel,
-                        v => v.DealerButton.Visibility,
+                        v => v.Visibility,
                         p => p != null ? Visibility.Visible : Visibility.Collapsed)
                     .DisposeWith(cleanUp);
 
@@ -26,6 +26,17 @@ namespace PokyPoker.Desktop.Views
                         vm => vm.PlayerViewModel.IsDealer,
                         v => v.DealerButton.Visibility,
                         d => d ? Visibility.Visible : Visibility.Collapsed)
+                    .DisposeWith(cleanUp);
+
+                this.OneWayBind(ViewModel,
+                        vm => vm.PlayerViewModel.PlayerState.Bet,
+                        v => v.BetLabel.Content)
+                    .DisposeWith(cleanUp);
+
+                this.OneWayBind(ViewModel,
+                        vm => vm.PlayerViewModel.PlayerState.Bet,
+                        v => v.BetLabel.Visibility,
+                        b => b == 0 ? Visibility.Collapsed : Visibility.Visible)
                     .DisposeWith(cleanUp);
             });
         }
