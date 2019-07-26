@@ -31,7 +31,7 @@ namespace PokyPoker.Desktop.Model
                 PhotoUrl = "Assets/Avatar3.png"
             });
 
-            playersSource.Add(new PlayerModel(new Player(3, deck.Take(2), true, 8000))
+            playersSource.Add(new PlayerModel(new Player(5, deck.Take(2), true, 8000))
             {
                 Name = "Gandalf The Grey",
                 PhotoUrl = "Assets/Avatar4.png"

@@ -173,28 +173,28 @@ namespace PokyPoker.Domain
             return options.ToArray();
         }
 
-        private IEnumerable<Player> TakeContributors(IDictionary<int, int> bets) => bets
+        private IEnumerable<Player> TakeContributors(IDictionary<Player, int> bets) => bets
             .Where(b => b.Value > 0)
-            .Select(b => Players[b.Key]);
+            .Select(b => b.Key);
 
         private IEnumerable<Pot> SplitPot()
         {
             var acts = Rounds.SelectMany(r => r.Acts).ToArray();
-            var playersBets = Players.ToDictionary(p => p.Spot, p => 0);
+            var playersBets = Players.ToDictionary(p => p, p => 0);
 
             var allInBets = new List<int>();
             foreach (var act in acts)
             {
-                playersBets[act.Player.Spot] += act.Bet;
+                playersBets[act.Player] += act.Bet;
                 if (act.Play == Play.AllIn)
-                    allInBets.Add(playersBets[act.Player.Spot]);
+                    allInBets.Add(playersBets[act.Player]);
             }
 
             if (!allInBets.Any())
             {
                 var maxBet = playersBets.Max(p => p.Value);
                 yield return Pot.Create(
-                    playersBets.Where(p => p.Value == maxBet).Select(p => Players[p.Key]),
+                    playersBets.Where(p => p.Value == maxBet).Select(p => p.Key),
                     acts.Sum(a => a.Bet));
                 yield break;
             }
@@ -211,16 +211,16 @@ namespace PokyPoker.Domain
 
                 foreach (var player in players)
                 {
-                    if (playersBets[player.Spot] >= contribution)
+                    if (playersBets[player] >= contribution)
                     {
                         contenders.Add(player);
-                        playersBets[player.Spot] -= contribution;
+                        playersBets[player] -= contribution;
                         amount += contribution;
                     }
                     else
                     {
-                        amount += playersBets[player.Spot];
-                        playersBets[player.Spot] = 0;
+                        amount += playersBets[player];
+                        playersBets[player] = 0;
                     }
                 }
 
