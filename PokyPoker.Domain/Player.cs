@@ -41,6 +41,20 @@ namespace PokyPoker.Domain
             return WithStack(stack);
         }
 
+        public Player MakePlay(Play play, int bet, out Act act)
+        {
+            if ((play == Play.Bet || play == Play.Raise) && bet == Stack)
+                play = Play.AllIn;
+
+            if (play == Play.Check || play == Play.Fold)
+                bet = 0;
+
+            var player = new Player(Spot, Hand, play != Play.Fold, Stack - bet);
+            act = new Act(player, play, bet);
+
+            return player;
+        }
+
         public Player MakeInactive()
         {
             return new Player(Spot, Hand, !IsActive, Stack);

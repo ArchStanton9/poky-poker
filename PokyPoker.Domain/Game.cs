@@ -111,11 +111,10 @@ namespace PokyPoker.Domain
             if (play == Play.Raise && player.Stack == bet)
                 play = Play.AllIn;
 
-            var playerAfter = new Player(player.Spot, player.Hand, play != Play.Fold, player.Stack - bet);
-            var act = new Act(playerAfter, play, bet);
-            var rounds = Rounds.Replace(CurrentRound, CurrentRound.MakeAct(act));
-            var players = Players.Replace(player, act.Player);
 
+            player = player.MakePlay(play, bet, out var act);
+            var rounds = Rounds.Replace(CurrentRound, CurrentRound.MakeAct(act));
+            var players = Players.Replace(player, player);
 
             var game = new Game(Rules, players, Table, rounds);
             if (game.IsComplete)
